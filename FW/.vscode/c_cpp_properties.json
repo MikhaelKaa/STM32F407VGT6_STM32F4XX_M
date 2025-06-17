@@ -21,7 +21,10 @@
                 "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/include",
                 "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
                 "${workspaceFolder}/app/retarget",
-                "${workspaceFolder}/app/u_read_line"
+                "${workspaceFolder}/app/u_read_line",
+                "${workspaceFolder}/app/ili9341_s",
+                "${workspaceFolder}/app/time",
+                "${workspaceFolder}/app/micros"
             ],
             "defines": [
                 "USE_HAL_DRIVER",

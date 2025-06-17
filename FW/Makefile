@@ -110,6 +110,8 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c
 
 C_SOURCES 	+= $(wildcard app/retarget/*.c)
 C_SOURCES 	+= $(wildcard app/u_read_line/*.c)
+C_SOURCES 	+= $(wildcard app/ili9341_s/*.c)
+C_SOURCES 	+= $(wildcard app/time/*.c)
 
 
 # ASM sources
@@ -187,6 +189,10 @@ C_INCLUDES =  \
 
 C_INCLUDES += -Iapp/retarget/
 C_INCLUDES += -Iapp/u_read_line/
+C_INCLUDES += -Iapp/ili9341_s/
+C_INCLUDES += -Iapp/time/
+C_INCLUDES += -Iapp/micros/
+
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections

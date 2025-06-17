@@ -28,16 +28,15 @@
 #include <stdio.h>
 #include "retarget.h"
 #include "ucmd.h"
-// #include "reset_cause.h"
-// #include "micros.h"
-// #include "term_gxf.h"
 
-// #include "ili9341.h"
+#include "ucmd_time.h"
+#include "micros.h"
 
+#include "ili9341.h"
+#include "testimg.h"
 
 #include "fatfs.h"
 
-// #include "mandelbrot.h"
 
 /* USER CODE END Includes */
 
@@ -96,11 +95,11 @@ command_t cmd_list[] = {
   //   .help = "memory man, use mem help",
   //   .fn   = ucmd_mem,
   // },
-  // {
-  //   .cmd  = "time",
-  //   .help = "rtc time. to set type time hh mm ss",
-  //   .fn   = ucmd_time,
-  // },
+  {
+    .cmd  = "time",
+    .help = "rtc time. to set type time hh mm ss",
+    .fn   = ucmd_time,
+  },
   // {
   //   .cmd  = "i2c",
   //   .help = "i2c scan devices",
@@ -159,9 +158,6 @@ __weak unsigned long getRunTimeCounterValue(void)
 return 0;
 }
 
-void ILI9341_DrawPixel_i(uint16_t x, uint16_t y, uint16_t color) {
-  ILI9341_DrawPixel(y, x, color);
-}
 
 /* USER CODE END 1 */
 
@@ -174,7 +170,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
   printf_init();
   ucmd_default_init();
-  // mandelbrot_draw_pixel = ILI9341_DrawPixel_i;
+
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -255,23 +251,19 @@ void ILI9341_task(void *argument)
   /* USER CODE BEGIN ILI9341_task */
   
   HAL_GPIO_WritePin(ILI9341_BLK_GPIO_Port,  ILI9341_BLK_Pin, GPIO_PIN_SET);
-  // ILI9341_Init();
+  ILI9341_Init();
   osDelay(10);
-  
-  
-  // mandelbrot_naive();
+  ILI9341_DrawImage(0, 0, 240, 320, (const uint16_t*)Simpsons_style_on_a_BMX);
 
   /* Infinite loop */
   for(;;)
   {
-    // update_time();
+    time_update();
     extern RTC_TimeTypeDef time;
     static char time_buf[20];
     sprintf(time_buf, "%02u:%02u:%02u", time.Hours, time.Minutes, time.Seconds);
-    // ILI9341_WriteString(0, 0, time_buf, Font_11x18, 0xffff, 0x000c);
+    ILI9341_WriteString(0, 0, time_buf, Font_11x18, 0xffff, 0x000c);
 
-
-    
     osDelay(200);
   }
   /* USER CODE END ILI9341_task */
