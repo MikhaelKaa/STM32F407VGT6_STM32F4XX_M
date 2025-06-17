@@ -1,0 +1,28 @@
+{
+	"cortex-debug.enableTelemetry": false,
+	//"cortex-debug.JLinkGDBServerPath": "C:/Software/JLink/JLinkGDBServerCL.exe",
+	"cortex-debug.armToolchainPath": "C:/arm_tool/gcc/bin/",
+  "cortex-debug.openocdPath": "C:/arm_tool/OpenOCD/xpack-openocd-0.11.0-3/bin/openocd.exe",
+  "files.associations": {
+    "main.h": "c",
+    "stm32f4xx_hal.h": "c",
+    "stm32f4xx_hal_conf.h": "c",
+    "stm32f4xx_hal_rcc.h": "c",
+    "stm32f4xx_hal_def.h": "c",
+    "stm32f4xx.h": "c",
+    "stm32_hal_legacy.h": "c",
+    "sa_ngpio.h": "c",
+    "batmeter.h": "c",
+    "retarget.h": "c",
+    "ili9341.h": "c",
+    "term_gxf.h": "c",
+    "fatfs.h": "c",
+    "usbd_storage_if.h": "c",
+    "usbd_msc.h": "c",
+    "stdio.h": "c",
+    "cmsis_os.h": "c",
+    "log_printf.h": "c",
+    "ucmd.h": "c"
+  },
+  "C_Cpp.dimInactiveRegions": true,
+}

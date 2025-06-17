@@ -1,0 +1,3 @@
+[submodule "FW/app"]
+	path = FW/app
+	url = https://github.com/MikhaelKaa/app.git

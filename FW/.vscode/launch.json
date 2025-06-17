@@ -1,0 +1,37 @@
+{
+	"version": "0.2.0",
+	"configurations": [	
+		{
+			"name": "cmsis-dap",
+			"cwd": "${workspaceRoot}",
+			"executable": "./build/firmware.elf",
+			"svdFile": "./dbg/STM32F407.svd",
+			"request": "launch",
+			"type": "cortex-debug",
+			"servertype": "openocd",
+			"interface": "swd",
+			//"adapter speed": "500",
+			"runToEntryPoint": "main",
+			"configFiles": [
+				"./dbg/cmsis-dap.cfg",
+				"./dbg/stm32f4x.cfg"
+			]
+		},
+
+		{
+			"name": "stlink",
+			"cwd": "${workspaceRoot}",
+			"executable": "./build/firmware.elf",
+			"svdFile": "./dbg/STM32F407.svd",
+			"request": "launch",
+			"type": "cortex-debug",
+			"servertype": "openocd",
+			"interface": "swd",
+			"runToEntryPoint": "main",
+			"configFiles": [
+				"./dbg/stlink.cfg",
+				"./dbg/stm32f4x.cfg"
+			]
+		}
+	]
+}

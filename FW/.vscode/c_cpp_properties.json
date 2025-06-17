@@ -1,0 +1,39 @@
+{
+    "configurations": [
+        {
+            "name": "arm_c_cpp_properties",
+            "compilerPath": "C:/arm_tool/gcc/bin/arm-none-eabi-gcc.exe",
+            "includePath": [
+                "C:/arm_tool/gcc/arm-none-eabi/include",
+                "C:/arm_tool/gcc/arm-none-eabi/include/sys/",
+                "C:/arm_tool/gcc/lib/**",
+                "${workspaceRoot}\\Drivers\\**",
+                "${workspaceRoot}\\Core\\Src\\**",
+                "${workspaceRoot}\\Core\\Inc\\**",
+                "${workspaceFolder}/FATFS/App",
+                "${workspaceFolder}/Middlewares/Third_Party/FatFs/src",
+                "${workspaceFolder}/FATFS/Target",
+                "${workspaceFolder}/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Inc",
+                "${workspaceFolder}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                "${workspaceFolder}/USB_DEVICE/Target",
+                "${workspaceFolder}/USB_DEVICE/App",
+                "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
+                "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/include",
+                "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
+                "${workspaceFolder}/app/retarget",
+                "${workspaceFolder}/app/u_read_line"
+            ],
+            "defines": [
+                "USE_HAL_DRIVER",
+                "STM32F407xx",
+                "M4",
+                "GCC_ARMCM4",
+                "HAL_UART_xCallback"
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-arm"
+        }
+    ],
+    "version": 4
+}
