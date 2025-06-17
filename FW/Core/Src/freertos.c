@@ -77,6 +77,11 @@ const osThreadAttr_t ILI9341_attributes = {
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
+int ucmd_mcu_reset(int argv, char ** argc) {
+  NVIC_SystemReset();
+  return -1;
+}
+
 // define command list
 command_t cmd_list[] = {
   {
@@ -85,16 +90,18 @@ command_t cmd_list[] = {
     .fn   = print_help_cb,
   },
 
-  // {
-  //   .cmd  = "reset",
-  //   .help = "reset mcu",
-  //   .fn   = ucmd_mcu_reset,
-  // }, 
+  {
+    .cmd  = "reset",
+    .help = "reset mcu",
+    .fn   = ucmd_mcu_reset,
+  }, 
+
   // {
   //   .cmd  = "mem",
   //   .help = "memory man, use mem help",
   //   .fn   = ucmd_mem,
   // },
+
   {
     .cmd  = "time",
     .help = "rtc time. to set type time hh mm ss",
@@ -253,13 +260,13 @@ void ILI9341_task(void *argument)
   HAL_GPIO_WritePin(ILI9341_BLK_GPIO_Port,  ILI9341_BLK_Pin, GPIO_PIN_SET);
   ILI9341_Init();
   osDelay(10);
-  ILI9341_DrawImage(0, 0, 240, 320, (const uint16_t*)Simpsons_style_on_a_BMX);
+  // ILI9341_DrawImage(0, 0, 240, 320, (const uint16_t*)Simpsons_style_on_a_BMX);
 
   /* Infinite loop */
   for(;;)
   {
-    time_update();
     extern RTC_TimeTypeDef time;
+    ucmd_time(2, (char*[]){"time", "u"});
     static char time_buf[20];
     sprintf(time_buf, "%02u:%02u:%02u", time.Hours, time.Minutes, time.Seconds);
     ILI9341_WriteString(0, 0, time_buf, Font_11x18, 0xffff, 0x000c);
