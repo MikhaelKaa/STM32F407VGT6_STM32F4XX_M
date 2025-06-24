@@ -24,14 +24,17 @@
                 "${workspaceFolder}/app/u_read_line",
                 "${workspaceFolder}/app/ili9341_s",
                 "${workspaceFolder}/app/time",
-                "${workspaceFolder}/app/micros"
+                "${workspaceFolder}/app/micros",
+                "${workspaceFolder}/app/mem",
+                "${workspaceFolder}/app/coremark"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
                 "STM32F407xx",
                 "M4",
                 "GCC_ARMCM4",
-                "HAL_UART_xCallback"
+                "HAL_UART_xCallback",
+                "BAREMETAL"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",
