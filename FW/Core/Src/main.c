@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
 #include "dma.h"
 #include "fatfs.h"
 #include "i2c.h"
@@ -33,6 +32,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "micros.h"
+#include "retarget.h"
 
 /* USER CODE END Includes */
 
@@ -62,7 +62,6 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -109,26 +108,21 @@ int main(void)
   MX_SPI2_Init();
   MX_RNG_Init();
   MX_FATFS_Init();
+  MX_USB_DEVICE_Init();
   MX_I2C3_Init();
   /* USER CODE BEGIN 2 */
   us_init();
+  printf_init();
   /* USER CODE END 2 */
 
-  /* Init scheduler */
-  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
-
-  /* Start scheduler */
-  osKernelStart();
-
-  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-
-    // delay_us(400000);
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    printf("Its work!!!\r\n");
+    printf_flush();
+    delay_us(400000);
 
     /* USER CODE END WHILE */
 
