@@ -27,7 +27,8 @@
                 "${workspaceFolder}/app/micros",
                 "${workspaceFolder}/app/mem",
                 "${workspaceFolder}/app/coremark",
-                "${workspaceFolder}/app/mpu6050"
+                "${workspaceFolder}/app/mpu6050",
+                "${workspaceFolder}/app/i2c_tool"
             ],
             "defines": [
                 "USE_HAL_DRIVER",

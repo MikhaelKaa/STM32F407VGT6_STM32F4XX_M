@@ -45,6 +45,8 @@
 
 #include "mpu6050.h"
 
+#include "i2c_tools.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -254,8 +256,8 @@ int ucmd_sd(int argc, char **argv) {
 
 // test code
 MPU6050_t mpu;
-int imu_show(int argc, char **argv) {
-  MPU6050_Read_All(&hi2c1, &mpu);
+int imu_show(void) {
+  // MPU6050_Read_All(&hi2c1, &mpu);
   printf("mpu.Ax = %f\r\n", mpu.Ax);
   printf("mpu.Ay = %f\r\n", mpu.Ay);
   printf("mpu.Az = %f\r\n", mpu.Az);
@@ -268,6 +270,53 @@ int imu_show(int argc, char **argv) {
   printf("mpu.KalmanAngleY = %f\r\n", mpu.KalmanAngleY);
   
   printf("mpu.Temperature = %f\r\n", mpu.Temperature);
+}
+
+int imu_show(void);
+
+// ucmd handler for mem_dump.
+int ucmd_imu(int argc, char *argv[])
+{
+  // static uint32_t argv2 = 0;
+  // static uint32_t argv3 = 0;
+  // static uint32_t argv4 = 0;
+  // static uint16_t argv5 = 0;
+  
+  switch (argc) {
+    case 1:
+    printf("imu usage: imu show | irq_en | irq_dis\r\n");
+    goto ok;
+    break;
+    case 2:
+    if(strcmp(&argv[1][0], "show") == 0) {
+      imu_show();
+      goto ok;
+    }
+    if(strcmp(&argv[1][0], "init") == 0) {
+      MPU6050_Init(&hi2c1);
+      goto ok;
+    }
+    
+    if(strcmp(&argv[1][0], "irq_en") == 0) {
+      MPU6050_Enable_irq(&hi2c1, &mpu);
+      goto ok;
+    }
+    if(strcmp(&argv[1][0], "irq_dis") == 0) {
+      MPU6050_Diasble_irq(&hi2c1, &mpu);
+      // HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+      goto ok;
+    }
+    break;
+    
+    default:
+    goto err;
+    break;
+  }
+  
+  goto err;
+  ok: return 0;
+  err: printf("ups...\r\n");
+  return -1;
 }
 
 
@@ -312,7 +361,13 @@ command_t cmd_list[] = {
   {
     .cmd  = "imu",
     .help = "imu test code",
-    .fn   = imu_show,
+    .fn   = ucmd_imu,
+  },
+  
+  {
+    .cmd  = "i2c",
+    .help = "i2c tool",
+    .fn   = ucmd_i2c,
   },
   
   
@@ -380,8 +435,7 @@ int main(void)
   printf_init();
   ucmd_default_init();
 
-  // IMU
-  MPU6050_Init(&hi2c1);
+  
   
   /* USER CODE END 2 */
 
