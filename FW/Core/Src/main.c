@@ -42,6 +42,9 @@
 #include "coremark.h"
 
 #include "fatfs.h"
+
+#include "mpu6050.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -249,6 +252,25 @@ int ucmd_sd(int argc, char **argv) {
 #undef ENDL
 
 
+// test code
+MPU6050_t mpu;
+int imu_show(int argc, char **argv) {
+  MPU6050_Read_All(&hi2c1, &mpu);
+  printf("mpu.Ax = %f\r\n", mpu.Ax);
+  printf("mpu.Ay = %f\r\n", mpu.Ay);
+  printf("mpu.Az = %f\r\n", mpu.Az);
+  
+  printf("mpu.Gx = %f\r\n", mpu.Gx);
+  printf("mpu.Gy = %f\r\n", mpu.Gy);
+  printf("mpu.Gz = %f\r\n", mpu.Gz);
+  
+  printf("mpu.KalmanAngleX = %f\r\n", mpu.KalmanAngleX);
+  printf("mpu.KalmanAngleY = %f\r\n", mpu.KalmanAngleY);
+  
+  printf("mpu.Temperature = %f\r\n", mpu.Temperature);
+}
+
+
 // define command list
 command_t cmd_list[] = {
   {
@@ -287,19 +309,30 @@ command_t cmd_list[] = {
     .fn   = ucmd_sd,
   },
   
+  {
+    .cmd  = "imu",
+    .help = "imu test code",
+    .fn   = imu_show,
+  },
+  
   
   {}, // null list terminator DON'T FORGET THIS!
 };
 
+
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-  // if(GPIO_Pin == GPIO_PIN_3) {
-  //   osSemaphoreRelease(mpu6050_irqHandle);
-  // }
+
+  if(GPIO_Pin == GPIO_PIN_7) {
+    MPU6050_Read_All(&hi2c1, &mpu);
+  }
+
   if(GPIO_Pin == NRF24L01_IRQ_Pin) {
     // NRF24L01_EXTI_IRQHandler(&nrf24L01Config);
     // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
   }
 }
+
 
 /* USER CODE END 0 */
 
@@ -346,6 +379,10 @@ int main(void)
   us_init();
   printf_init();
   ucmd_default_init();
+
+  // IMU
+  MPU6050_Init(&hi2c1);
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */

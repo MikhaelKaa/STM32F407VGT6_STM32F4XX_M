@@ -26,7 +26,8 @@
                 "${workspaceFolder}/app/time",
                 "${workspaceFolder}/app/micros",
                 "${workspaceFolder}/app/mem",
-                "${workspaceFolder}/app/coremark"
+                "${workspaceFolder}/app/coremark",
+                "${workspaceFolder}/app/mpu6050"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
