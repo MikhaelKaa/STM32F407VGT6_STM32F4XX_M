@@ -42,7 +42,7 @@
     {
       "label": "STLink Write MCU Default",
       "type": "shell",
-      "command": "make flash",
+      "command": "make flash_dap",
       "options": {
         "cwd": "${workspaceRoot}",
         "shell": {

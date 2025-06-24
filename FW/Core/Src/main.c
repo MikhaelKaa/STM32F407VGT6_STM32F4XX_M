@@ -341,6 +341,7 @@ int main(void)
   MX_FATFS_Init();
   MX_USB_DEVICE_Init();
   MX_I2C3_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   us_init();
   printf_init();
