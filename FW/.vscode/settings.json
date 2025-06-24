@@ -23,7 +23,8 @@
     "cmsis_os.h": "c",
     "log_printf.h": "c",
     "ucmd.h": "c",
-    "ucmd_time.h": "c"
+    "ucmd_time.h": "c",
+    "micros.h": "c"
   },
   "C_Cpp.dimInactiveRegions": true,
 }

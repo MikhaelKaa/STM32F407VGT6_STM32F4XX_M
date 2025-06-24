@@ -32,6 +32,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "micros.h"
 
 /* USER CODE END Includes */
 
@@ -110,7 +111,7 @@ int main(void)
   MX_FATFS_Init();
   MX_I2C3_Init();
   /* USER CODE BEGIN 2 */
-  
+  us_init();
   /* USER CODE END 2 */
 
   /* Init scheduler */

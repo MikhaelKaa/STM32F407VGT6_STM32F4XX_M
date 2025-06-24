@@ -37,6 +37,8 @@
 
 #include "fatfs.h"
 
+#include "memory_man.h"
+#include "coremark.h"
 
 /* USER CODE END Includes */
 
@@ -77,10 +79,144 @@ const osThreadAttr_t ILI9341_attributes = {
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
-int ucmd_mcu_reset(int argv, char ** argc) {
+int ucmd_mcu_reset(int argc, char ** argv) {
   NVIC_SystemReset();
   return -1;
 }
+
+
+#include "errno.h"
+#include "string.h"
+
+#define ENDL "\r\n"
+#define BUFFER_SIZE 128
+
+// Глобальные объекты FatFS
+static FATFS fs;         // Объект файловой системы
+static DIR dir;          // Объект каталога
+static FIL fil;          // Объект файла
+static char path[4] = "0:/";  // Путь к SD-карте
+static uint8_t is_mounted = 0; // Флаг монтирования
+
+int ucmd_sd(int argc, char **argv) {
+    switch (argc) {
+        case 1:
+            printf("Usage: sd <command>" ENDL);
+            printf("Commands: mount, unmount, ls, rm <file>, cat <file>" ENDL);
+            return -EINVAL;
+        
+        case 2:
+            if (strcmp(argv[1], "mount") == 0) {
+                // Монтирование SD-карты
+                FRESULT res = f_mount(&fs, path, 1);
+                if (res != FR_OK) {
+                    printf("Mount error: %d" ENDL, res);
+                    return -EIO;
+                }
+                is_mounted = 1;
+                printf("SD mounted" ENDL);
+                return 0;
+            
+            } else if (strcmp(argv[1], "unmount") == 0) {
+                // Демонтирование SD-карты
+                if (!is_mounted) {
+                    printf("Not mounted!" ENDL);
+                    return -EIO;
+                }
+                f_mount(NULL, path, 0);
+                is_mounted = 0;
+                printf("SD unmounted" ENDL);
+                return 0;
+            
+            } else if (strcmp(argv[1], "ls") == 0) {
+                // Вывод содержимого каталога
+                if (!is_mounted) {
+                    printf("Mount first!" ENDL);
+                    return -EIO;
+                }
+                
+                FRESULT res;
+                FILINFO fno;
+                
+                res = f_opendir(&dir, path);
+                if (res != FR_OK) {
+                    printf("Open dir error: %d" ENDL, res);
+                    return -EIO;
+                }
+                
+                printf("Directory listing:" ENDL);
+                for (;;) {
+                    res = f_readdir(&dir, &fno);
+                    if (res != FR_OK || fno.fname[0] == 0) break;
+                    
+                    if (fno.fattrib & AM_DIR)
+                        printf("  [DIR]  %s" ENDL, fno.fname);
+                    else
+                        printf("  [FILE] %s (%lu bytes)" ENDL, fno.fname, fno.fsize);
+                }
+                f_closedir(&dir);
+                return 0;
+            }
+            break;
+        
+        case 3:
+            if (strcmp(argv[1], "rm") == 0) {
+                // Удаление файла
+                if (!is_mounted) {
+                    printf("Mount first!" ENDL);
+                    return -EIO;
+                }
+                
+                FRESULT res = f_unlink(argv[2]);
+                if (res != FR_OK) {
+                    printf("Delete error: %d" ENDL, res);
+                    return -EIO;
+                }
+                printf("File '%s' deleted" ENDL, argv[2]);
+                return 0;
+            
+            } else if (strcmp(argv[1], "cat") == 0) {
+                // Вывод содержимого файла
+                if (!is_mounted) {
+                    printf("Mount first!" ENDL);
+                    return -EIO;
+                }
+                
+                FRESULT res = f_open(&fil, argv[2], FA_READ);
+                if (res != FR_OK) {
+                    printf("Open error: %d" ENDL, res);
+                    return -EIO;
+                }
+                
+                UINT bytes_read;
+                char buffer[BUFFER_SIZE];
+                printf("File content:" ENDL);
+                do {
+                    res = f_read(&fil, buffer, BUFFER_SIZE - 1, &bytes_read);
+                    if (res != FR_OK) {
+                        f_close(&fil);
+                        printf("Read error: %d" ENDL, res);
+                        return -EIO;
+                    }
+                    buffer[bytes_read] = 0; // NULL-terminator
+                    printf("%s", buffer);
+                } while (bytes_read == BUFFER_SIZE - 1);
+                
+                f_close(&fil);
+                printf(ENDL);
+                return 0;
+            }
+            break;
+    }
+
+    printf("Invalid command or arguments!" ENDL);
+    printf("Usage: sd <mount|unmount|ls|rm|cat>" ENDL);
+    return -EINVAL;
+}
+
+#undef ENDL
+
+
 
 // define command list
 command_t cmd_list[] = {
@@ -96,37 +232,30 @@ command_t cmd_list[] = {
     .fn   = ucmd_mcu_reset,
   }, 
 
-  // {
-  //   .cmd  = "mem",
-  //   .help = "memory man, use mem help",
-  //   .fn   = ucmd_mem,
-  // },
+  {
+    .cmd  = "mem",
+    .help = "memory man, use mem help",
+    .fn   = ucmd_mem,
+  },
 
   {
     .cmd  = "time",
     .help = "rtc time. to set type time hh mm ss",
     .fn   = ucmd_time,
   },
-  // {
-  //   .cmd  = "i2c",
-  //   .help = "i2c scan devices",
-  //   .fn   = ucmd_i2c,
-  // },
-  // {
-  //   .cmd  = "ps",
-  //   .help = "Free RTOS time stat",
-  //   .fn   = ucmd_freertos_stat,
-  // },
-  // {
-  //   .cmd  = "imu",
-  //   .help = "Inertial Measurement Unit",
-  //   .fn   = ucmd_imu,
-  // },
-  // {
-  //   .cmd  = "spi",
-  //   .help = "spi, code me",
-  //   .fn   = ucmd_spi,
-  // },
+
+  {
+    .cmd  = "coremark",
+    .help = "coremark",
+    .fn   = coremark,
+  },
+
+  {
+    .cmd  = "sd",
+    .help = "sd card test utils",
+    .fn   = ucmd_sd,
+  },
+  
   
   {}, // null list terminator DON'T FORGET THIS!
 };
@@ -177,7 +306,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
   printf_init();
   ucmd_default_init();
-
+  
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -234,7 +363,7 @@ void StartDefaultTask(void *argument)
     
     // LED
     static uint32_t led_toggle = 0;
-    if(led_toggle++%128 == 0) HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    if(led_toggle++%32 == 0) HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
     // printf out
     // TODO: может так получиться, что osDelay(10); это мало, вывод принтф будет битый - надо переделывать логику работы.
