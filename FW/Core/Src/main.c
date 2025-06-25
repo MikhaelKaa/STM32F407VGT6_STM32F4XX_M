@@ -41,7 +41,7 @@
 #include "memory_man.h"
 #include "coremark.h"
 
-#include "fatfs.h"
+#include "fatfs.h" 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
