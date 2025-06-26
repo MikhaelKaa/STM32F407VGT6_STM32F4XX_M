@@ -40,9 +40,9 @@
       "problemMatcher": []
     },
     {
-      "label": "STLink Write MCU Default",
+      "label": "Write MCU Default",
       "type": "shell",
-      "command": "make flash_dap",
+      "command": "make flash",
       "options": {
         "cwd": "${workspaceRoot}",
         "shell": {
@@ -61,9 +61,9 @@
 
 
     {
-      "label": "STLink Reset MCU",
+      "label": "Reset MCU",
       "type": "shell",
-      "command": "ST-LINK_CLI.exe -rst",
+      "command": "make reset",
       "options": {
         "cwd": "${workspaceRoot}",
         "shell": {
