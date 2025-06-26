@@ -47,6 +47,8 @@
 
 #include "i2c_tools.h"
 
+#include "ili9341.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -434,7 +436,13 @@ int main(void)
   us_init();
   printf_init();
   ucmd_default_init();
-
+  ILI9341_Init();
+  ILI9341_back_light(1);
+  ILI9341_WriteString(0, 0, "init done", Font_11x18, 0xffff, 0x0000);
+  ILI9341_WriteString(0, Font_11x18.height*1, "red", Font_11x18, ILI9341_COLOR565(0xff, 0x00, 0x00), 0x0000);
+  ILI9341_WriteString(0, Font_11x18.height*2, "green", Font_11x18, ILI9341_COLOR565(0x00, 0xff, 0x00), 0x0000);
+  ILI9341_WriteString(0, Font_11x18.height*3, "blue", Font_11x18, ILI9341_COLOR565(0x00, 0x00, 0xff), 0x0000);
+  
   
   
   /* USER CODE END 2 */

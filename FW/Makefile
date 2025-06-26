@@ -107,6 +107,9 @@ C_SOURCES 	+= $(wildcard app/coremark/*.c)
 C_SOURCES 	+= $(wildcard app/mpu6050/*.c)
 C_SOURCES 	+= $(wildcard app/i2c_tool/*.c)
 
+
+
+
 # ASM sources
 ASM_SOURCES =  startup_stm32f407xx.s
 
@@ -191,6 +194,7 @@ C_INCLUDES += -Iapp/mem/
 C_INCLUDES += -Iapp/coremark/
 C_INCLUDES += -Iapp/mpu6050/
 C_INCLUDES += -Iapp/i2c_tool/
+
 
 
 # compile gcc flags
