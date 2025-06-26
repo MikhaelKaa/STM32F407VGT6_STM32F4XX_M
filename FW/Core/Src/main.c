@@ -49,6 +49,8 @@
 
 #include "ili9341.h"
 
+#include "bmp.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -272,6 +274,7 @@ int imu_show(void) {
   printf("mpu.KalmanAngleY = %f\r\n", mpu.KalmanAngleY);
   
   printf("mpu.Temperature = %f\r\n", mpu.Temperature);
+  return 0;
 }
 
 int imu_show(void);
@@ -321,7 +324,6 @@ int ucmd_imu(int argc, char *argv[])
   return -1;
 }
 
-
 // define command list
 command_t cmd_list[] = {
   {
@@ -370,6 +372,12 @@ command_t cmd_list[] = {
     .cmd  = "i2c",
     .help = "i2c tool",
     .fn   = ucmd_i2c,
+  },
+
+  {
+    .cmd  = "bmp",
+    .help = "bmp tool",
+    .fn   = ucmd_bmp,
   },
   
   
@@ -436,6 +444,8 @@ int main(void)
   us_init();
   printf_init();
   ucmd_default_init();
+
+
   ILI9341_Init();
   ILI9341_back_light(1);
   ILI9341_WriteString(0, 0, "init done", Font_11x18, 0xffff, 0x0000);
@@ -443,6 +453,12 @@ int main(void)
   ILI9341_WriteString(0, Font_11x18.height*2, "green", Font_11x18, ILI9341_COLOR565(0x00, 0xff, 0x00), 0x0000);
   ILI9341_WriteString(0, Font_11x18.height*3, "blue", Font_11x18, ILI9341_COLOR565(0x00, 0x00, 0xff), 0x0000);
   
+  if(!ucmd_sd(2, (char*[]){"sd ", "mount"})) {printf("SD card mount!\r\n");}
+  else{printf("SD card not mount!!!\r\n");}
+
+  BMP_draw_pixel = ILI9341_DrawPixel;
+  BMP_scr_width = ILI9341_WIDTH;
+  BMP_scr_heigth = ILI9341_HEIGHT;
   
   
   /* USER CODE END 2 */
