@@ -108,7 +108,7 @@ C_SOURCES 	+= $(wildcard app/mpu6050/*.c)
 C_SOURCES 	+= $(wildcard app/i2c_tool/*.c)
 
 # ASM sources
-ASM_SOURCES =  \startup_stm32f407xx.s
+ASM_SOURCES =  startup_stm32f407xx.s
 
 
 #######################################
@@ -263,11 +263,11 @@ clean:
 -include $(wildcard $(BUILD_DIR)/*.d)
 
 
-# Load firmware.bin use OpenOCD
+# Load firmware.bin (hex) use OpenOCD
 flash_dap:
-	openocd.exe -f ./dbg/cmsis-dap.cfg -f ./dbg/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase build/firmware.hex" -c "reset run" -c "exit"
+	openocd -f ./dbg/cmsis-dap.cfg -f ./dbg/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase build/firmware.hex" -c "reset run" -c "exit"
 
 flash_st:
-	openocd.exe -f ./dbg/stlink.cfg -f ./dbg/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase build/firmware.hex" -c "reset run" -c "exit"
+	openocd -f ./dbg/stlink.cfg -f ./dbg/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase build/firmware.hex" -c "reset run" -c "exit"
 
 # *** EOF ***

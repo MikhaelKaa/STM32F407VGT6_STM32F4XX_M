@@ -1,8 +1,8 @@
 {
 	"cortex-debug.enableTelemetry": false,
 	//"cortex-debug.JLinkGDBServerPath": "C:/Software/JLink/JLinkGDBServerCL.exe",
-	"cortex-debug.armToolchainPath": "C:/arm_tool/gcc/bin/",
-  "cortex-debug.openocdPath": "C:/arm_tool/OpenOCD/xpack-openocd-0.11.0-3/bin/openocd.exe",
+	// "cortex-debug.armToolchainPath": "C:/arm_tool/gcc/bin/",
+  // "cortex-debug.openocdPath": "C:/arm_tool/OpenOCD/xpack-openocd-0.11.0-3/bin/openocd.exe",
   "files.associations": {
     "main.h": "c",
     "stm32f4xx_hal.h": "c",
@@ -25,7 +25,8 @@
     "ucmd.h": "c",
     "ucmd_time.h": "c",
     "micros.h": "c",
-    "mpu6050.h": "c"
+    "mpu6050.h": "c",
+    "i2c_tools.h": "c"
   },
   "C_Cpp.dimInactiveRegions": true,
 }
