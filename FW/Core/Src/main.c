@@ -91,9 +91,9 @@ int ucmd_mcu_reset(int argc, char ** argv) {
   return -1;
 }
 
-#include "errno.h"
+#include <errno.h>
+#include <string.h>
 #include "fatfs.h"
-#include "string.h"
 
 #define ENDL "\r\n"
 #define BUFFER_SIZE 128

@@ -8,7 +8,7 @@
 			"svdFile": "./dbg/STM32F407.svd",
 			"request": "launch",
 			"type": "cortex-debug",
-			"gdbPath": "gdb-multiarch",
+			"gdbPath": "gdb-multiarch", // !!! comment this on windows !!!
 			"servertype": "openocd",
 			"interface": "swd",
 			//"adapter speed": "500",

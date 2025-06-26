@@ -2,7 +2,10 @@
     "configurations": [
         {
             "name": "arm_c_cpp_properties",
+            // "compilerPath": "C:/arm_tool/gcc/bin/arm-none-eabi-gcc.exe", // fow windows
             "includePath": [
+                // "C:/arm_tool/gcc/arm-none-eabi/include", // for windows
+                // "C:/arm_tool/gcc/arm-none-eabi/include/sys/", // for windows
                 "${workspaceRoot}/Drivers/**",
                 "${workspaceRoot}/Core/Src/**",
                 "${workspaceRoot}/Core/Inc/**",
