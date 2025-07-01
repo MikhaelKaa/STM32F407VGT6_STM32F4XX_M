@@ -324,6 +324,84 @@ int ucmd_imu(int argc, char *argv[])
   return -1;
 }
 
+#include "terminal.h"
+#include "term_gxf.h"
+#define ENDL "\r\n"
+int ucmd_term_test(int argc, char *argv[]) {
+    if(argc < 2) {
+        // Вывод справки, если нет аргументов
+        printf("Usage: term <command> [args]" ENDL);
+        printf("Commands:" ENDL);
+        printf("  cls                  Clear screen" ENDL);
+        printf("  text <string>        Print text" ENDL);
+        printf("  color <fg> [bg]      Set colors" ENDL);
+        printf("  cursor <row> <col>   Set cursor position" ENDL);
+        printf("  ili                  Test direct char output" ENDL);
+        return 0;
+    }
+
+    char *command = argv[1];
+    
+    if(strcmp(command, "cls") == 0) {
+        // Очистка экрана
+        terminal_input_data(ESC "[2J", sizeof(ESC "[2J") - 1);
+    }
+    else if(strcmp(command, "text") == 0 && argc >= 3) {
+        // Вывод текста
+        char *text = argv[2];
+        terminal_input_data(text, strlen(text));
+        
+        // Добавляем перевод строки, если текст не заканчивается на \n
+        if(text[strlen(text)-1] != '\n') {
+            terminal_input_data("\n", 1);
+        }
+    }
+    else if(strcmp(command, "color") == 0 && argc >= 3) {
+        // Установка цвета
+        char color_cmd[32];
+        int bg = -1;
+        int fg = atoi(argv[2]);
+        
+        if(argc >= 4) {
+            bg = atoi(argv[3]);
+        }
+        
+        if(bg >= 0) {
+            snprintf(color_cmd, sizeof(color_cmd), ESC "[%d;%dm", fg, bg);
+        } else {
+            snprintf(color_cmd, sizeof(color_cmd), ESC "[%dm", fg);
+        }
+        
+        terminal_input_data(color_cmd, strlen(color_cmd));
+    }
+    else if(strcmp(command, "cursor") == 0 && argc >= 4) {
+        // Установка позиции курсора
+        int row = atoi(argv[2]);
+        int col = atoi(argv[3]);
+        char cursor_cmd[32];
+        
+        snprintf(cursor_cmd, sizeof(cursor_cmd), ESC "[%d;%dH", row, col);
+        terminal_input_data(cursor_cmd, strlen(cursor_cmd));
+    }
+    else if(strcmp(command, "ili") == 0) {
+        // Прямой вывод символа
+        ILI9341_Select();
+        ILI9341_WriteChar(0, 0, 'U', Font_7x10, 0xffff, 0x0000);
+        ILI9341_Unselect();
+    }
+    else {
+        printf("Unknown command or missing arguments" ENDL);
+        return -1;
+    }
+
+    return 0;
+}
+
+#ifdef ENDL
+#undef ENDL 
+#endif // ENDL
+
+
 // define command list
 command_t cmd_list[] = {
   {
@@ -379,12 +457,16 @@ command_t cmd_list[] = {
     .help = "bmp tool",
     .fn   = ucmd_bmp,
   },
+
+  {
+    .cmd  = "term",
+    .help = "term test",
+    .fn   = ucmd_term_test,
+  },
   
   
   {}, // null list terminator DON'T FORGET THIS!
 };
-
-
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
@@ -460,7 +542,8 @@ int main(void)
   BMP_scr_width = ILI9341_WIDTH;
   BMP_scr_heigth = ILI9341_HEIGHT;
   
-  
+  // draw_pixel = ILI9341_DrawPixel;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

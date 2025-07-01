@@ -107,6 +107,7 @@ C_SOURCES 	+= $(wildcard app/coremark/*.c)
 C_SOURCES 	+= $(wildcard app/mpu6050/*.c)
 C_SOURCES 	+= $(wildcard app/i2c_tool/*.c)
 C_SOURCES 	+= $(wildcard app/bmp/*.c)
+C_SOURCES 	+= $(wildcard app/terminal/*.c)
 
 
 
@@ -196,6 +197,7 @@ C_INCLUDES += -Iapp/coremark/
 C_INCLUDES += -Iapp/mpu6050/
 C_INCLUDES += -Iapp/i2c_tool/
 C_INCLUDES += -Iapp/bmp/
+C_INCLUDES += -Iapp/terminal/
 
 
 
