@@ -24,7 +24,8 @@
                 "${workspaceFolder}/app/i2c_tool",
                 "${workspaceFolder}/Core/Inc",
                 "${workspaceFolder}/app/bmp",
-                "${workspaceFolder}/app/terminal"
+                "${workspaceFolder}/app/terminal",
+                "${workspaceFolder}/Drivers/STM32F4xx_HAL_Driver/Inc"
             ],
             "defines": [
                 "USE_HAL_DRIVER",

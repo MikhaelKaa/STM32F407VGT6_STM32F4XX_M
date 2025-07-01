@@ -51,6 +51,8 @@
 
 #include "bmp.h"
 
+#include "ucmd_time_HAL.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -320,7 +322,7 @@ int ucmd_imu(int argc, char *argv[])
   
   goto err;
   ok: return 0;
-  err: printf("ups...\r\n");
+  err: printf("imu say: ups...\r\n");
   return -1;
 }
 
@@ -468,6 +470,7 @@ command_t cmd_list[] = {
   {}, // null list terminator DON'T FORGET THIS!
 };
 
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
   if(GPIO_Pin == GPIO_PIN_7) {
@@ -530,19 +533,25 @@ int main(void)
 
   ILI9341_Init();
   ILI9341_back_light(1);
-  ILI9341_WriteString(0, 0, "init done", Font_11x18, 0xffff, 0x0000);
-  ILI9341_WriteString(0, Font_11x18.height*1, "red", Font_11x18, ILI9341_COLOR565(0xff, 0x00, 0x00), 0x0000);
-  ILI9341_WriteString(0, Font_11x18.height*2, "green", Font_11x18, ILI9341_COLOR565(0x00, 0xff, 0x00), 0x0000);
-  ILI9341_WriteString(0, Font_11x18.height*3, "blue", Font_11x18, ILI9341_COLOR565(0x00, 0x00, 0xff), 0x0000);
+  // ILI9341_WriteString(0, 0, "init done", Font_11x18, 0xffff, 0x0000);
+  // ILI9341_WriteString(0, Font_11x18.height*1, "red", Font_11x18, ILI9341_COLOR565(0xff, 0x00, 0x00), 0x0000);
+  // ILI9341_WriteString(0, Font_11x18.height*2, "green", Font_11x18, ILI9341_COLOR565(0x00, 0xff, 0x00), 0x0000);
+  // ILI9341_WriteString(0, Font_11x18.height*3, "blue", Font_11x18, ILI9341_COLOR565(0x00, 0x00, 0xff), 0x0000);
   
-  if(!ucmd_sd(2, (char*[]){"sd ", "mount"})) {printf("SD card mount!\r\n");}
-  else{printf("SD card not mount!!!\r\n");}
-
   BMP_draw_pixel = ILI9341_DrawPixel;
   BMP_scr_width = ILI9341_WIDTH;
   BMP_scr_heigth = ILI9341_HEIGHT;
   
+  if(!ucmd_sd(2, (char*[]){"sd ", "mount"})) {
+    printf("SD card mount!\r\n");
+    ucmd_bmp(3, (char*[]){"bmp", "load", "0:/eva.bmp"});
+  }
+  else{printf("SD card not mount!!!\r\n");}
+
   // draw_pixel = ILI9341_DrawPixel;
+  ucmd_imu(2, (char*[]){"imu", "init"});
+  ucmd_imu(2, (char*[]){"imu", "irq_en"});
+  
 
   /* USER CODE END 2 */
 
@@ -551,7 +560,25 @@ int main(void)
   while (1)
   {
     static int led_cnt = 0;
-    if(led_cnt++ % 512 == 0) HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    if(led_cnt++ % 128 == 0) {
+      HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+      time_update();
+      char term_data[12];
+      // set coordinats time
+      snprintf(term_data, sizeof(term_data), ESC "[%d;%dH", 0, 38);
+      terminal_input_data(term_data, strlen(term_data));
+      // draw time
+      snprintf(term_data, sizeof(term_data), "%02u:%02u:%02u", time.Hours, time.Minutes, time.Seconds);
+      terminal_input_data(term_data, strlen(term_data));
+
+      //
+      // MPU6050_Read_All(&hi2c1, &mpu);
+      snprintf(term_data, sizeof(term_data), ESC "[%d;%dH", 13, 20);
+      terminal_input_data(term_data, strlen(term_data));
+      snprintf(term_data, sizeof(term_data), "%0.2f:%0.2f", mpu.KalmanAngleX, mpu.KalmanAngleY);
+      terminal_input_data(term_data, strlen(term_data));
+
+    }
     ucmd_default_proc();
     printf_flush();
     delay_us(800);
