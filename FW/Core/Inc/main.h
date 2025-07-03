@@ -62,6 +62,8 @@ void dump_hex(uint8_t *buf, uint32_t len);
 #define KEY_GPIO_Port GPIOA
 #define LED_Pin GPIO_PIN_1
 #define LED_GPIO_Port GPIOA
+#define GPS_PPS_Pin GPIO_PIN_4
+#define GPS_PPS_GPIO_Port GPIOA
 #define ILI9341_DC_Pin GPIO_PIN_5
 #define ILI9341_DC_GPIO_Port GPIOC
 #define ILI9341_BLK_Pin GPIO_PIN_1
