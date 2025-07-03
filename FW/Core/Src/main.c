@@ -475,14 +475,21 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
   if(GPIO_Pin == GPIO_PIN_7) {
     MPU6050_Read_All(&hi2c1, &mpu);
-  }
+  } else
 
   if(GPIO_Pin == NRF24L01_IRQ_Pin) {
     // NRF24L01_EXTI_IRQHandler(&nrf24L01Config);
     // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+  } else
+
+  if(GPIO_Pin == GPS_PPS_Pin) {
+    
   }
+
 }
 
+
+uint8_t uart_gps_buf[2];
 
 /* USER CODE END 0 */
 
@@ -531,7 +538,6 @@ int main(void)
   printf_init();
   ucmd_default_init();
 
-
   ILI9341_Init();
   ILI9341_back_light(1);
   // ILI9341_WriteString(0, 0, "init done", Font_11x18, 0xffff, 0x0000);
@@ -553,7 +559,7 @@ int main(void)
   ucmd_imu(2, (char*[]){"imu", "init"});
   ucmd_imu(2, (char*[]){"imu", "irq_en"});
   
-
+  HAL_UART_Receive_DMA(&huart2, uart_gps_buf, sizeof(uart_gps_buf));
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -638,6 +644,53 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+  if(huart->Instance == USART1) {
+    CLEAR_BIT(huart->Instance->CR2, (USART_CR2_LINEN  | USART_CR2_CLKEN)); 
+    CLEAR_BIT(huart->Instance->CR3, (USART_CR3_SCEN   |\
+                                     USART_CR3_HDSEL  | USART_CR3_IREN)); 
+    huart->ErrorCode  = HAL_UART_ERROR_NONE; 
+    huart->gState     = HAL_UART_STATE_READY; 
+    huart->RxState    = HAL_UART_STATE_READY; 
+
+    // __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+    HAL_UART_Receive_DMA(&huart1, uart_dma_buf, sizeof(uart_dma_buf));
+  }
+
+  if(huart->Instance == USART2) {
+    CLEAR_BIT(huart->Instance->CR2, (USART_CR2_LINEN  | USART_CR2_CLKEN)); 
+    CLEAR_BIT(huart->Instance->CR3, (USART_CR3_SCEN   |\
+                                     USART_CR3_HDSEL  | USART_CR3_IREN)); 
+    huart->ErrorCode  = HAL_UART_ERROR_NONE; 
+    huart->gState     = HAL_UART_STATE_READY; 
+    huart->RxState    = HAL_UART_STATE_READY; 
+
+    // __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+    HAL_UART_Receive_DMA(&huart2, uart_gps_buf, sizeof(uart_gps_buf));
+  }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if(huart->Instance == USART1) {
+    u1_rx_callback(uart_dma_buf[1]);
+  }else
+  if(huart->Instance == USART2) {
+    // printf("%c", uart_gps_buf[1]);
+  }
+}
+
+void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
+{
+  if(huart->Instance == USART1) {
+    u1_rx_callback(uart_dma_buf[0]);
+  }else
+  if(huart->Instance == USART2) {
+    // printf("%c", uart_gps_buf[0]);
+  }
+}
 
 /* USER CODE END 4 */
 

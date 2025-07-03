@@ -32,7 +32,6 @@
                 "STM32F407xx",
                 "M4",
                 "GCC_ARMCM4",
-                "HAL_UART_xCallback",
                 "BAREMETAL"
             ],
             "cStandard": "c11",

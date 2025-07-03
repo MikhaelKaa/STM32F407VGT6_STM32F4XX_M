@@ -160,7 +160,6 @@ AS_DEFS =
 C_DEFS =  \
 -DUSE_HAL_DRIVER \
 -DSTM32F407xx \
--DHAL_UART_xCallback \
 -DBAREMETAL 
 
 # Coremark defines
