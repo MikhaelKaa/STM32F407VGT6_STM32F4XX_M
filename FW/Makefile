@@ -35,85 +35,23 @@ BUILD_DIR = build
 # source
 ######################################
 # C sources
-C_SOURCES =  \
-Core/Src/main.c \
-Core/Src/gpio.c \
-Core/Src/dma.c \
-Core/Src/sdio.c \
-Core/Src/spi.c \
-Core/Src/usart.c \
-Core/Src/stm32f4xx_it.c \
-Core/Src/stm32f4xx_hal_msp.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_sdmmc.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sd.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \
-Core/Src/system_stm32f4xx.c \
-Core/Src/rtc.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc_ex.c \
-Core/Src/rng.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c \
-FATFS/Target/bsp_driver_sd.c \
-FATFS/Target/sd_diskio.c \
-FATFS/Target/fatfs_platform.c \
-FATFS/App/fatfs.c \
-Middlewares/Third_Party/FatFs/src/diskio.c \
-Middlewares/Third_Party/FatFs/src/ff.c \
-Middlewares/Third_Party/FatFs/src/ff_gen_drv.c \
-Middlewares/Third_Party/FatFs/src/option/syscall.c \
-USB_DEVICE/App/usb_device.c \
-USB_DEVICE/App/usbd_desc.c \
-USB_DEVICE/App/usbd_storage_if.c \
-USB_DEVICE/Target/usbd_conf.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c \
-Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
-Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
-Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
-Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src/usbd_msc.c \
-Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src/usbd_msc_bot.c \
-Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src/usbd_msc_data.c \
-Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src/usbd_msc_scsi.c \
-Core/Src/stm32f4xx_hal_timebase_tim.c \
-Core/Src/i2c.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c \
-Middlewares/Third_Party/FatFs/src/option/ccsbcs.c
+C_SOURCES += src/main.c
+C_SOURCES += src/syscalls.c
 
-
-C_SOURCES 	+= $(wildcard app/retarget/*.c)
-C_SOURCES 	+= $(wildcard app/u_read_line/*.c)
-C_SOURCES 	+= $(wildcard app/ili9341_s/*.c)
-C_SOURCES 	+= $(wildcard app/time/*.c)
-C_SOURCES 	+= $(wildcard app/mem/*.c)
-C_SOURCES 	+= $(wildcard app/coremark/*.c)
-C_SOURCES 	+= $(wildcard app/mpu6050/*.c)
-C_SOURCES 	+= $(wildcard app/i2c_tool/*.c)
-C_SOURCES 	+= $(wildcard app/bmp/*.c)
-C_SOURCES 	+= $(wildcard app/terminal/*.c)
-
-
-
+# C includes
+C_INCLUDES = -ICMSIS/
 
 # ASM sources
-ASM_SOURCES =  startup_stm32f407xx.s
+ASM_SOURCES =  src/startup_stm32f407xx.s
+# AS includes
+AS_INCLUDES = 
+
+# macros for gcc
+# AS defines
+AS_DEFS = 
+
+# C defines
+C_DEFS += -DSTM32F407xx
 
 
 #######################################
@@ -143,8 +81,7 @@ BIN = $(CP) -O binary -S
 CPU = -mcpu=cortex-m4
 
 # fpu
-#FPU = -mfpu=fpv4-sp-d16
-FPU = -mfpu=fpv4-sp-d16 -u _printf_float
+FPU = -mfpu=fpv4-sp-d16
 
 # float-abi
 FLOAT-ABI = -mfloat-abi=hard
@@ -152,58 +89,12 @@ FLOAT-ABI = -mfloat-abi=hard
 # mcu
 MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 
-# macros for gcc
-# AS defines
-AS_DEFS = 
-
-# C defines
-C_DEFS =  \
--DUSE_HAL_DRIVER \
--DSTM32F407xx \
--DBAREMETAL 
-
-# Coremark defines
-C_DEFS +=  \
--DITERATIONS=4096 \
--DCLOCKS_PER_SEC=1000 \
--DCOREMARK_TIME=millis
-
-# AS includes
-AS_INCLUDES = 
-
-# C includes
-C_INCLUDES =  \
--ICore/Inc \
--IDrivers/STM32F4xx_HAL_Driver/Inc \
--IDrivers/STM32F4xx_HAL_Driver/Inc/Legacy \
--IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
--IDrivers/CMSIS/Include \
--IFATFS/Target \
--IFATFS/App \
--IMiddlewares/Third_Party/FatFs/src \
--IUSB_DEVICE/App \
--IUSB_DEVICE/Target \
--IMiddlewares/ST/STM32_USB_Device_Library/Core/Inc \
--IMiddlewares/ST/STM32_USB_Device_Library/Class/MSC/Inc
-
-C_INCLUDES += -Iapp/retarget/
-C_INCLUDES += -Iapp/u_read_line/
-C_INCLUDES += -Iapp/ili9341_s/
-C_INCLUDES += -Iapp/time/
-C_INCLUDES += -Iapp/micros/
-C_INCLUDES += -Iapp/mem/
-C_INCLUDES += -Iapp/coremark/
-C_INCLUDES += -Iapp/mpu6050/
-C_INCLUDES += -Iapp/i2c_tool/
-C_INCLUDES += -Iapp/bmp/
-C_INCLUDES += -Iapp/terminal/
-
-
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
 CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+CFLAGS += -Wextra -Wpedantic -Wconversion
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
@@ -218,12 +109,15 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = STM32F407VGTx_FLASH.ld
+LDSCRIPT = linker/STM32F407VGTx_FLASH.ld
 
 # libraries
-LIBS = -lc -lm -lnosys 
+LIBS = -lc -lm
 LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS += $(MCU)
+LDFLAGS += -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) 
+LDFLAGS += -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref 
+LDFLAGS += -Wl,--gc-sections
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin

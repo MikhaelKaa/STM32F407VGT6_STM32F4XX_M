@@ -2,41 +2,19 @@
     "configurations": [
         {
             "name": "arm_c_cpp_properties",
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
             "includePath": [
                 "${workspaceRoot}/Drivers/**",
-                "${workspaceRoot}/Core/Src/**",
-                "${workspaceRoot}/Core/Inc/**",
-                "${workspaceFolder}/FATFS/App",
-                "${workspaceFolder}/Middlewares/Third_Party/FatFs/src",
-                "${workspaceFolder}/FATFS/Target",
-                "${workspaceFolder}/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Inc",
-                "${workspaceFolder}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
-                "${workspaceFolder}/USB_DEVICE/Target",
-                "${workspaceFolder}/USB_DEVICE/App",
-                "${workspaceFolder}/app/retarget",
-                "${workspaceFolder}/app/u_read_line",
-                "${workspaceFolder}/app/ili9341_s",
-                "${workspaceFolder}/app/time",
-                "${workspaceFolder}/app/micros",
-                "${workspaceFolder}/app/mem",
-                "${workspaceFolder}/app/coremark",
-                "${workspaceFolder}/app/mpu6050",
-                "${workspaceFolder}/app/i2c_tool",
-                "${workspaceFolder}/Core/Inc",
-                "${workspaceFolder}/app/bmp",
-                "${workspaceFolder}/app/terminal",
-                "${workspaceFolder}/Drivers/STM32F4xx_HAL_Driver/Inc"
+                "/usr/include/newlib"
             ],
             "defines": [
-                "USE_HAL_DRIVER",
-                "STM32F407xx",
-                "M4",
-                "GCC_ARMCM4",
-                "BAREMETAL"
+                "STM32F407xx"//,
+                // "M4",
+                // "GCC_ARMCM4"
             ],
-            "cStandard": "c11",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "windows-gcc-arm"
+            "cStandard": "c99",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "linux-gcc-arm"
         }
     ],
     "version": 4

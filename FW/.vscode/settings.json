@@ -28,7 +28,8 @@
     "mpu6050.h": "c",
     "i2c_tools.h": "c",
     "fonts.h": "c",
-    "terminal_types.h": "c"
+    "terminal_types.h": "c",
+    "errno.h": "c"
   },
   "C_Cpp.dimInactiveRegions": true,
 }
