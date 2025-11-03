@@ -43,6 +43,8 @@ C_SOURCES += app/board_led/green_led.c
 # C includes
 C_INCLUDES += -ICMSIS/
 C_INCLUDES += -Iapp/board_led/
+C_INCLUDES += -Iapp/dwt_delay/
+
 
 
 # ASM sources

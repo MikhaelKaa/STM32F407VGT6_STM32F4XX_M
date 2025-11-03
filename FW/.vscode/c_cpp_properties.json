@@ -7,7 +7,8 @@
                 "${workspaceRoot}/Drivers/**",
                 "/usr/include/newlib",
                 "${workspaceFolder}/CMSIS",
-                "${workspaceFolder}/app/board_led"
+                "${workspaceFolder}/app/board_led",
+                "${workspaceFolder}/app/dwt_delay"
             ],
             "defines": [
                 "STM32F407xx"

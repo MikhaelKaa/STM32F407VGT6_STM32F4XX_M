@@ -1,29 +1,23 @@
 
 #include "stm32f407xx.h"
 #include "green_led.h"
-
-// Простая функция задержки
-void delay(void) {
-  for (volatile uint32_t i = 0; i < 500000; i++);
-}
+#include "dwt_delay.h"
 
 int main(void) {
 
-  // init board led/
+  // init board led
   green_led_init();
 
+  // init dwt time module
+  dwt_delay_init();
+  
   while (1) {
 
     // blink led demo
     green_led_set(led_off);
-    delay();
+    dwt_delay_ms(500);
     
     green_led_set(led_on);
-    delay();
+    dwt_delay_ms(500);
   }
 }
-
-// void SystemInit (void)
-// {
-//   //SystemCoreClock = SYSTEM_CLOCK;
-// }
