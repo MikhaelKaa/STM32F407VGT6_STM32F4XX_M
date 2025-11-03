@@ -37,9 +37,12 @@ BUILD_DIR = build
 # C sources
 C_SOURCES += src/main.c
 C_SOURCES += src/syscalls.c
+C_SOURCES += app/board_led/green_led.c
 
 # C includes
-C_INCLUDES = -ICMSIS/
+C_INCLUDES += -ICMSIS/
+C_INCLUDES += -Iapp/board_led/
+
 
 # ASM sources
 ASM_SOURCES =  src/startup_stm32f407xx.s

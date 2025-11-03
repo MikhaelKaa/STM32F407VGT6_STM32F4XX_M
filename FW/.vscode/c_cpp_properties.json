@@ -6,7 +6,8 @@
             "includePath": [
                 "${workspaceRoot}/Drivers/**",
                 "/usr/include/newlib",
-                "${workspaceFolder}/CMSIS"
+                "${workspaceFolder}/CMSIS",
+                "${workspaceFolder}/app/board_led"
             ],
             "defines": [
                 "STM32F407xx"
