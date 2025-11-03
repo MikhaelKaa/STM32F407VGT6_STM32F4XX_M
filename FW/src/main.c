@@ -23,7 +23,7 @@ int main(void) {
   }
 }
 
-void SystemInit (void)
-{
-  //SystemCoreClock = SYSTEM_CLOCK;
-}
+// void SystemInit (void)
+// {
+//   //SystemCoreClock = SYSTEM_CLOCK;
+// }
