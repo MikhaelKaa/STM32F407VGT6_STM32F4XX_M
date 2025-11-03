@@ -166,9 +166,9 @@ clean:
 
 # Load firmware.bin (hex) use OpenOCD
 flash_dap:
-	openocd -f ./dbg/cmsis-dap.cfg -f ./dbg/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase build/firmware.hex" -c "reset run" -c "exit"
+	openocd -f ./openocd/cmsis-dap.cfg -f ./openocd/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase build/firmware.hex" -c "reset run" -c "exit"
 
 flash_st:
-	openocd -f ./dbg/stlink.cfg -f ./dbg/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase build/firmware.hex" -c "reset run" -c "exit"
+	openocd -f ./openocd/stlink.cfg -f ./openocd/stm32f4x.cfg -c init -c "reset halt" -c "flash write_image erase build/firmware.hex" -c "reset run" -c "exit"
 
 # *** EOF ***

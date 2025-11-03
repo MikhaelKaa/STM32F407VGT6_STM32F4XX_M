@@ -29,7 +29,9 @@
     "i2c_tools.h": "c",
     "fonts.h": "c",
     "terminal_types.h": "c",
-    "errno.h": "c"
+    "errno.h": "c",
+    "stm32f407xx.h": "c",
+    "core_cm4.h": "c"
   },
   "C_Cpp.dimInactiveRegions": true,
 }
