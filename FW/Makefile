@@ -39,11 +39,14 @@ C_SOURCES += src/main.c
 C_SOURCES += src/syscalls.c
 C_SOURCES += src/system_init.c
 C_SOURCES += app/board_led/green_led.c
+C_SOURCES += dev/uart1/uart1.c
 
 # C includes
 C_INCLUDES += -ICMSIS/
 C_INCLUDES += -Iapp/board_led/
 C_INCLUDES += -Iapp/dwt_delay/
+C_INCLUDES += -Idev/uart1/
+
 
 
 

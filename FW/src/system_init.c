@@ -64,7 +64,14 @@ void SystemInit(void)
                    (0 << 16)  |  // PLLP = 2
                    (7 << 24)  |  // PLLQ = 7
                    RCC_PLLCFGR_PLLSRC_HSE;
-
+    // Variant pll
+    // Настройка PLL: HSE -> PLL, 168 MHz
+    // RCC->PLLCFGR = (8 << RCC_PLLCFGR_PLLM_Pos) |    // PLLM = 8
+    //                (336 << RCC_PLLCFGR_PLLN_Pos) |  // PLLN = 336
+    //                (0 << RCC_PLLCFGR_PLLP_Pos) |    // PLLP = 2
+    //                (7 << RCC_PLLCFGR_PLLQ_Pos) |    // PLLQ = 7
+    //                RCC_PLLCFGR_PLLSRC_HSE;
+    
     // Включаем PLL
     RCC->CR |= RCC_CR_PLLON;
     timeout = 1000000;

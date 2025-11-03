@@ -31,7 +31,8 @@
     "terminal_types.h": "c",
     "errno.h": "c",
     "stm32f407xx.h": "c",
-    "core_cm4.h": "c"
+    "core_cm4.h": "c",
+    "dwt_delay.h": "c"
   },
   "C_Cpp.dimInactiveRegions": true,
 }

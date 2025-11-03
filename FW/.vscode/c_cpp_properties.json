@@ -8,7 +8,8 @@
                 "/usr/include/newlib",
                 "${workspaceFolder}/CMSIS",
                 "${workspaceFolder}/app/board_led",
-                "${workspaceFolder}/app/dwt_delay"
+                "${workspaceFolder}/app/dwt_delay",
+                "${workspaceFolder}/app/uart1"
             ],
             "defines": [
                 "STM32F407xx"
