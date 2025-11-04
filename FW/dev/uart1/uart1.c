@@ -77,6 +77,8 @@ void uart_init(void) {
     // Clear buffers
     memset((void *)tx_buffer, 0, UART_TX_BUFFER_SIZE);
     memset((void *)rx_buffer, 0, UART_RX_BUFFER_SIZE);
+
+    setvbuf(stdin, NULL, _IONBF, 0);
 }
 
 // Open UART (POSIX-like)
@@ -153,7 +155,7 @@ ssize_t uart_read(void *buf, size_t count) {
     size_t bytes_read = 0;
     
     // Calculate available bytes in ring buffer
-    uint32_t available = uart_available();
+    uint32_t available = (uint32_t)uart_available();
     if (available == 0) {
         return 0;  // No data available
     }
@@ -178,11 +180,14 @@ int uart_available(void) {
     uint32_t current_write_pos = (UART_RX_BUFFER_SIZE - current_ndtr) % UART_RX_BUFFER_SIZE;
     
     if (current_write_pos >= rx_read_pos) {
-        return current_write_pos - rx_read_pos;
+        return (int)(current_write_pos - rx_read_pos);
     } else {
-        return (UART_RX_BUFFER_SIZE - rx_read_pos) + current_write_pos;
+        return (int)((UART_RX_BUFFER_SIZE - rx_read_pos) + current_write_pos);
     }
 }
+
+
+
 
 // Flush RX buffer
 int uart_flush(void) {
@@ -194,7 +199,7 @@ int uart_flush(void) {
 void USART1_IRQHandler(void) {
     // RXNE interrupt - data received
     if (USART1->SR & USART_SR_RXNE) {
-        volatile uint8_t data = USART1->DR;  // Read to clear flag
+        volatile uint8_t data = (uint8_t)USART1->DR;  // Read to clear flag
         (void)data;  // Suppress unused warning
         // Data is handled by DMA, this is just for flag clearing
     }
@@ -224,47 +229,47 @@ void DMA2_Stream5_IRQHandler(void) {
     }
 }
 
-// printf implementation using UART
-int uart_printf(const char *format, ...) {
-    char buffer[256];
-    va_list args;
-    va_start(args, format);
-    int len = vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
+// // printf implementation using UART
+// int uart_printf(const char *format, ...) {
+//     char buffer[256];
+//     va_list args;
+//     va_start(args, format);
+//     int len = vsnprintf(buffer, sizeof(buffer), format, args);
+//     va_end(args);
     
-    if (len > 0) {
-        uart_write(buffer, len);
-    }
+//     if (len > 0) {
+//         uart_write(buffer, len);
+//     }
     
-    return len;
-}
+//     return len;
+// }
 
-// scanf implementation using UART (simplified)
-int uart_scanf(const char *format, ...) {
-    char buffer[256];
-    va_list args;
-    va_start(args, format);
+// // scanf implementation using UART (simplified)
+// int uart_scanf(const char *format, ...) {
+//     char buffer[256];
+//     va_list args;
+//     va_start(args, format);
     
-    // Wait for data with timeout
-    uint32_t timeout = 1000000;
-    while (uart_available() == 0 && timeout--) {
-        __asm__("nop");
-    }
+//     // Wait for data with timeout
+//     uint32_t timeout = 1000000;
+//     while (uart_available() == 0 && timeout--) {
+//         __asm__("nop");
+//     }
     
-    if (timeout == 0) {
-        va_end(args);
-        return UART_ETIMEOUT;
-    }
+//     if (timeout == 0) {
+//         va_end(args);
+//         return UART_ETIMEOUT;
+//     }
     
-    // Read available data
-    ssize_t bytes_read = uart_read(buffer, sizeof(buffer) - 1);
-    if (bytes_read > 0) {
-        buffer[bytes_read] = '\0';
-        int result = vsscanf(buffer, format, args);
-        va_end(args);
-        return result;
-    }
+//     // Read available data
+//     ssize_t bytes_read = uart_read(buffer, sizeof(buffer) - 1);
+//     if (bytes_read > 0) {
+//         buffer[bytes_read] = '\0';
+//         int result = vsscanf(buffer, format, args);
+//         va_end(args);
+//         return result;
+//     }
     
-    va_end(args);
-    return 0;
-}
+//     va_end(args);
+//     return 0;
+// }

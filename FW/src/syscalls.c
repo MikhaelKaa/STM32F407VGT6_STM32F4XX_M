@@ -29,15 +29,43 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/times.h>
+#include <unistd.h> 
 
-
-/* Variables */
-extern int __io_putchar(int ch) __attribute__((weak));
-extern int __io_getchar(void) __attribute__((weak));
-
+#include "uart1.h"
 
 char *__env[1] = { 0 };
 char **environ = __env;
+
+int _write(int file, char *ptr, int len)
+{
+  if (file == STDOUT_FILENO || file == STDERR_FILENO) {
+    return uart_write(ptr, (size_t)len);
+  }
+  errno = EIO;
+  return -1;
+}
+
+// Что то мне подсказывает, что это нечто кривое получилось. Но оно работает.
+int __io_getchar(void) {
+  uint8_t ch = 0;
+  uart_read(&ch, 1);
+  return ch;
+}
+
+
+int _read(int file, char *ptr, int len)
+{
+  if (file == STDIN_FILENO) {
+    for (int DataIdx = 0; DataIdx < len; DataIdx++) {
+        *ptr++ = (char)__io_getchar();
+    }
+    return len;
+  }
+  errno = EIO;
+  return -1;
+}
+
+
 
 
 /* Functions */
@@ -64,30 +92,6 @@ void _exit (int status)
   while (1) {}    /* Make sure we hang here */
 }
 
-__attribute__((weak)) int _read(int file, char *ptr, int len)
-{
-  (void)file;
-  int DataIdx;
-
-  for (DataIdx = 0; DataIdx < len; DataIdx++)
-  {
-    *ptr++ = (char)__io_getchar();
-  }
-
-  return len;
-}
-
-__attribute__((weak)) int _write(int file, char *ptr, int len)
-{
-  (void)file;
-  int DataIdx;
-
-  for (DataIdx = 0; DataIdx < len; DataIdx++)
-  {
-    __io_putchar(*ptr++);
-  }
-  return len;
-}
 
 int _close(int file)
 {

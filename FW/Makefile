@@ -38,6 +38,7 @@ BUILD_DIR = build
 C_SOURCES += src/main.c
 C_SOURCES += src/syscalls.c
 C_SOURCES += src/system_init.c
+C_SOURCES += src/sysmem.c
 C_SOURCES += app/board_led/green_led.c
 C_SOURCES += dev/uart1/uart1.c
 
@@ -102,8 +103,22 @@ MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
-CFLAGS += -Wextra -Wpedantic -Wconversion
+CFLAGS += $(MCU)
+CFLAGS += $(C_DEFS)
+CFLAGS += $(C_INCLUDES)
+CFLAGS += $(OPT)
+CFLAGS += -std=gnu11
+CFLAGS += -Wall
+CFLAGS += -Wextra
+CFLAGS += -Wpedantic
+CFLAGS += -Wconversion
+# CFLAGS += -Wmissing-prototypes
+# CFLAGS += -Wstrict-prototypes
+CFLAGS += -fdata-sections
+CFLAGS += -ffunction-sections
+CFLAGS += -D_DEBUG
+CFLAGS += -D_DEFAULT_SOURCE
+
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
@@ -121,12 +136,19 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDSCRIPT = linker/STM32F407VGTx_FLASH.ld
 
 # libraries
-LIBS = -lc -lm
+LIBS += -lc
+LIBS += -lm
 LIBDIR = 
 LDFLAGS += $(MCU)
-LDFLAGS += -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) 
-LDFLAGS += -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref 
+LDFLAGS += $(LIBS)
+LDFLAGS += $(LIBDIR)
+LDFLAGS += -T$(LDSCRIPT)
+LDFLAGS += -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref
+LDFLAGS += -specs=nano.specs
+LDFLAGS += -specs=nosys.specs
 LDFLAGS += -Wl,--gc-sections
+LDFLAGS += -u _printf_float
+LDFLAGS += -u _scanf_float
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin

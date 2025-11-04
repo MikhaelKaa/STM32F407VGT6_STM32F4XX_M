@@ -32,7 +32,8 @@
     "errno.h": "c",
     "stm32f407xx.h": "c",
     "core_cm4.h": "c",
-    "dwt_delay.h": "c"
+    "dwt_delay.h": "c",
+    "unistd.h": "c"
   },
   "C_Cpp.dimInactiveRegions": true,
 }
