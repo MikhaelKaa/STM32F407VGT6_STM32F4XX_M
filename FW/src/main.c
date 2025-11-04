@@ -5,6 +5,8 @@
 #include "green_led.h"
 #include "dwt_delay.h"
 #include "uart1.h"
+#include "ucmd.h"
+
 
 int main(void) {
   
@@ -19,21 +21,18 @@ int main(void) {
   
   printf("Its work\r\n");
   
+  ucmd_default_init();
+
   uint32_t  led_cnt     = 0;
-  char ch = 0;
+  
   while (1) {
 
     // blink led demo
     green_led_set((led_cnt++&256)?(led_off):(led_on));
     
-    if(scanf("%c", &ch) == 1) {
-      printf("%c", ch);
-      fflush(stdout);
-    }
+    ucmd_default_proc();
 
     dwt_delay_ms(1);
   }
 }
-
-
 

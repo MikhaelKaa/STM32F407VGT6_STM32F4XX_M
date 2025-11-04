@@ -10,7 +10,8 @@
                 "${workspaceFolder}/app/board_led",
                 "${workspaceFolder}/app/dwt_delay",
                 "${workspaceFolder}/app/uart1",
-                "${workspaceFolder}/dev/uart1"
+                "${workspaceFolder}/dev/uart1",
+                "${workspaceFolder}/app/u_read_line"
             ],
             "defines": [
                 "STM32F407xx"
