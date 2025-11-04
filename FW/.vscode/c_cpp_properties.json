@@ -4,14 +4,12 @@
             "name": "arm_c_cpp_properties",
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
             "includePath": [
-                "${workspaceRoot}/Drivers/**",
                 "/usr/include/newlib",
                 "${workspaceFolder}/CMSIS",
                 "${workspaceFolder}/app/board_led",
                 "${workspaceFolder}/app/dwt_delay",
-                "${workspaceFolder}/app/uart1",
                 "${workspaceFolder}/dev/uart1",
-                "${workspaceFolder}/app/u_read_line"
+                "${workspaceFolder}/app/cli"
             ],
             "defines": [
                 "STM32F407xx"
