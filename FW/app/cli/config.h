@@ -13,7 +13,7 @@ Command line length, define cmdline buffer size. Set max number of chars + 1,
 because last byte of buffer need to contain '\0' - NULL terminator, and 
 not use for storing inputed char.
 If user input chars more then it parametrs-1, chars not added to command line.*/
-#define _COMMAND_LINE_LEN (1+100)									// for 32 chars
+#define _COMMAND_LINE_LEN (1U + 100U)									// for 32 chars
 
 /*
 Command token number, define max token it command line, if number of token 
@@ -21,7 +21,7 @@ typed in command line exceed this value, then prints message about it and
 command line not to be parced and 'execute' callback will not calls.
 Token is word separate by white space, for example 3 token line:
 "IRin> set mode test" */
-#define _COMMAND_TOKEN_NMB 8
+#define _COMMAND_TOKEN_NMB (8U)
 
 /*
 Define you prompt string here. You can use colors escape code, for highlight you prompt,
@@ -33,7 +33,7 @@ for example this prompt will green color (if you terminal supports color)*/
 /*
 Define prompt text (without ESC sequence, only text) prompt length, it needs because if you use
 ESC sequence, it's not possible detect only text length*/
-#define _PROMPT_LEN       2
+#define _PROMPT_LEN       (2U)
 
 /*Define it, if you wanna use completion functional, also set completion callback in you code,
 now if user press TAB calls 'copmlitetion' callback. If you no need it, you can just set 
@@ -52,7 +52,7 @@ For saving memory, each entered cmdline store to history in ring buffer,
 so we can not say, how many line we can store, it depends from cmdline len,
 but memory using more effective. We not prefer dinamic memory allocation for
 small and embedded devices. Overhead is 2 char on each saved line*/
-#define _RING_HISTORY_LEN 256
+#define _RING_HISTORY_LEN (256U)
 
 /*
 Enable Handling terminal ESC sequence. If disabling, then cursor arrow, HOME, END will not work,
@@ -100,7 +100,7 @@ New line symbol */
 /********** END CONFIG SECTION ************/
 
 
-#if _RING_HISTORY_LEN > 256
+#if _RING_HISTORY_LEN > 256U
 #error "This history implementation (ring buffer with 1 byte iterator) allow 256 byte buffer size maximum"
 #endif
 

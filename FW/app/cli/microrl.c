@@ -25,22 +25,22 @@ char * prompt_default = _PROMPT_DEFAULT;
 static void print_hist (ring_history_t * pThis)
 {
     printf ("\n");
-    for (int i = 0; i < _RING_HISTORY_LEN; i++) {
-        if (i == pThis->begin)
+    for (unsigned int i = 0; i < _RING_HISTORY_LEN; i++) {
+        if (i == (unsigned int)pThis->begin)
             printf ("b");
         else 
             printf (" ");
     }
     printf ("\n");
-    for (int i = 0; i < _RING_HISTORY_LEN; i++) {
+    for (unsigned int i = 0; i < _RING_HISTORY_LEN; i++) {
         if (isalpha(pThis->ring_buf[i]))
             printf ("%c", pThis->ring_buf[i]);
         else 
-            printf ("%d", pThis->ring_buf[i]);
+            printf ("%d", (unsigned char)pThis->ring_buf[i]);
     }
     printf ("\n");
-    for (int i = 0; i < _RING_HISTORY_LEN; i++) {
-        if (i == pThis->end)
+    for (unsigned int i = 0; i < _RING_HISTORY_LEN; i++) {
+        if (i == (unsigned int)pThis->end)
             printf ("e");
         else 
             printf (" ");
@@ -53,24 +53,24 @@ static void print_hist (ring_history_t * pThis)
 // remove older message from ring buffer
 static void hist_erase_older (ring_history_t * pThis)
 {
-    int new_pos = pThis->begin + pThis->ring_buf [pThis->begin] + 1;
+    unsigned int new_pos = (unsigned int)pThis->begin + (unsigned char)pThis->ring_buf [pThis->begin] + 1U;
     if (new_pos >= _RING_HISTORY_LEN)
         new_pos = new_pos - _RING_HISTORY_LEN;
     
-    pThis->begin = new_pos;
+    pThis->begin = (int)new_pos;
 }
 
 //*****************************************************************************
 // check space for new line, remove older while not space
-static int hist_is_space_for_new (ring_history_t * pThis, int len)
+static int hist_is_space_for_new (ring_history_t * pThis, unsigned int len)
 {
     if (pThis->ring_buf [pThis->begin] == 0)
         return true;
     if (pThis->end >= pThis->begin) {
-        if (_RING_HISTORY_LEN - pThis->end + pThis->begin - 1 > len)
+        if (_RING_HISTORY_LEN - (unsigned int)pThis->end + (unsigned int)pThis->begin - 1U > len)
             return true;
     }	else {
-        if (pThis->begin - pThis->end - 1> len)
+        if ((unsigned int)pThis->begin - (unsigned int)pThis->end - 1U > len)
             return true;
     }
     return false;
@@ -80,27 +80,28 @@ static int hist_is_space_for_new (ring_history_t * pThis, int len)
 // put line to ring buffer
 static void hist_save_line (ring_history_t * pThis, char * line, int len)
 {
-    if (len > _RING_HISTORY_LEN - 2)
+    unsigned int ulen = (unsigned int)len;
+    if (ulen > _RING_HISTORY_LEN - 2U)
         return;
-    while (!hist_is_space_for_new (pThis, len)) {
+    while (!hist_is_space_for_new (pThis, ulen)) {
         hist_erase_older (pThis);
     }
     // if it's first line
     if (pThis->ring_buf [pThis->begin] == 0) 
-        pThis->ring_buf [pThis->begin] = len;
+        pThis->ring_buf [pThis->begin] = (char)(unsigned char)len;
     
     // store line
-    if (len < _RING_HISTORY_LEN-pThis->end-1)
-        memcpy (pThis->ring_buf + pThis->end + 1, line, len);
+    if (ulen < _RING_HISTORY_LEN - (unsigned int)pThis->end - 1U)
+        memcpy (pThis->ring_buf + pThis->end + 1, line, ulen);
     else {
-        int part_len = _RING_HISTORY_LEN-pThis->end-1;
+        unsigned int part_len = _RING_HISTORY_LEN - (unsigned int)pThis->end - 1U;
         memcpy (pThis->ring_buf + pThis->end + 1, line, part_len);
-        memcpy (pThis->ring_buf, line + part_len, len - part_len);
+        memcpy (pThis->ring_buf, line + part_len, ulen - part_len);
     }
-    pThis->ring_buf [pThis->end] = len;
+    pThis->ring_buf [pThis->end] = (char)(unsigned char)len;
     pThis->end = pThis->end + len + 1;
-    if (pThis->end >= _RING_HISTORY_LEN)
-        pThis->end -= _RING_HISTORY_LEN;
+    if ((unsigned int)pThis->end >= _RING_HISTORY_LEN)
+        pThis->end -= (int)_RING_HISTORY_LEN;
     pThis->ring_buf [pThis->end] = 0;
     pThis->cur = 0;
 #ifdef _HISTORY_DEBUG
@@ -114,9 +115,9 @@ static int hist_restore_line (ring_history_t * pThis, char * line, int dir)
 {
     int cnt = 0;
     // count history record	
-    int header = pThis->begin;
+    unsigned int header = (unsigned int)pThis->begin;
     while (pThis->ring_buf [header] != 0) {
-        header += pThis->ring_buf [header] + 1;
+        header += (unsigned char)pThis->ring_buf [header] + 1U;
         if (header >= _RING_HISTORY_LEN)
             header -= _RING_HISTORY_LEN; 
         cnt++;
@@ -124,11 +125,11 @@ static int hist_restore_line (ring_history_t * pThis, char * line, int dir)
 
     if (dir == _HIST_UP) {
         if (cnt >= pThis->cur) {
-            int header = pThis->begin;
+            unsigned int header = (unsigned int)pThis->begin;
             int j = 0;
             // found record for 'pThis->cur' index
             while ((pThis->ring_buf [header] != 0) && (cnt - j -1 != pThis->cur)) {
-                header += pThis->ring_buf [header] + 1;
+                header += (unsigned char)pThis->ring_buf [header] + 1U;
                 if (header >= _RING_HISTORY_LEN)
                     header -= _RING_HISTORY_LEN;
                 j++;
@@ -136,38 +137,38 @@ static int hist_restore_line (ring_history_t * pThis, char * line, int dir)
             if (pThis->ring_buf[header]) {
                     pThis->cur++;
                 // obtain saved line
-                if (pThis->ring_buf [header] + header < _RING_HISTORY_LEN) {
+                if ((unsigned char)pThis->ring_buf [header] + header < _RING_HISTORY_LEN) {
                     memset (line, 0, _COMMAND_LINE_LEN);
-                    memcpy (line, pThis->ring_buf + header + 1, pThis->ring_buf[header]);
+                    memcpy (line, pThis->ring_buf + header + 1, (unsigned char)pThis->ring_buf[header]);
                 } else {
-                    int part0 = _RING_HISTORY_LEN - header - 1;
+                    unsigned int part0 = _RING_HISTORY_LEN - header - 1U;
                     memset (line, 0, _COMMAND_LINE_LEN);
                     memcpy (line, pThis->ring_buf + header + 1, part0);
-                    memcpy (line + part0, pThis->ring_buf, pThis->ring_buf[header] - part0);
+                    memcpy (line + part0, pThis->ring_buf, (unsigned char)pThis->ring_buf[header] - part0);
                 }
-                return pThis->ring_buf[header];
+                return (unsigned char)pThis->ring_buf[header];
             }
         }
     } else {
         if (pThis->cur > 0) {
                 pThis->cur--;
-            int header = pThis->begin;
+            unsigned int header = (unsigned int)pThis->begin;
             int j = 0;
 
             while ((pThis->ring_buf [header] != 0) && (cnt - j != pThis->cur)) {
-                header += pThis->ring_buf [header] + 1;
+                header += (unsigned char)pThis->ring_buf [header] + 1U;
                 if (header >= _RING_HISTORY_LEN)
                     header -= _RING_HISTORY_LEN;
                 j++;
             }
-            if (pThis->ring_buf [header] + header < _RING_HISTORY_LEN) {
-                memcpy (line, pThis->ring_buf + header + 1, pThis->ring_buf[header]);
+            if ((unsigned char)pThis->ring_buf [header] + header < _RING_HISTORY_LEN) {
+                memcpy (line, pThis->ring_buf + header + 1, (unsigned char)pThis->ring_buf[header]);
             } else {
-                int part0 = _RING_HISTORY_LEN - header - 1;
+                unsigned int part0 = _RING_HISTORY_LEN - header - 1U;
                 memcpy (line, pThis->ring_buf + header + 1, part0);
-                memcpy (line + part0, pThis->ring_buf, pThis->ring_buf[header] - part0);
+                memcpy (line + part0, pThis->ring_buf, (unsigned char)pThis->ring_buf[header] - part0);
             }
-            return pThis->ring_buf[header];
+            return (unsigned char)pThis->ring_buf[header];
         } else {
             /* empty line */
             return 0;
@@ -197,7 +198,7 @@ static int split (microrl_t * pThis, int limit, char const ** tkn_arr)
         }
         if (!(ind < limit)) return i;
         tkn_arr[i++] = pThis->cmdline + ind;
-        if (i >= _COMMAND_TOKEN_NMB) {
+        if (i >= (int)_COMMAND_TOKEN_NMB) {
             return -1;
         }
         // go to the first NOT whitespace (not zerro for us)
@@ -266,10 +267,10 @@ static void terminal_move_cursor (microrl_t * pThis, int offset)
     char *endstr;
     strcpy (str, "\033[");
     if (offset > 0) {
-        endstr = u16bit_to_str (offset, str+2);
+        endstr = u16bit_to_str ((unsigned int)offset, str+2);
         strcpy (endstr, "C");
     } else if (offset < 0) {
-        endstr = u16bit_to_str (-(offset), str+2);
+        endstr = u16bit_to_str ((unsigned int)(-offset), str+2);
         strcpy (endstr, "D");
     } else
         return;
@@ -288,9 +289,9 @@ static void terminal_reset_cursor (microrl_t * pThis)
 #else
     char *endstr;
     strcpy (str, "\033[");
-    endstr = u16bit_to_str ( _COMMAND_LINE_LEN + _PROMPT_LEN + 2,str+2);
+    endstr = u16bit_to_str ((unsigned int)(_COMMAND_LINE_LEN + _PROMPT_LEN + 2),str+2);
     strcpy (endstr, "D\033["); endstr += 3;
-    endstr = u16bit_to_str (_PROMPT_LEN, endstr);
+    endstr = u16bit_to_str ((unsigned int)_PROMPT_LEN, endstr);
     strcpy (endstr, "C");
 #endif
     pThis->print (str);
@@ -431,10 +432,10 @@ static int escape_process (microrl_t * pThis, char ch)
 static int microrl_insert_text (microrl_t * pThis, char * text, int len)
 {
     int i;
-    if (pThis->cmdlen + len < _COMMAND_LINE_LEN) {
+    if (pThis->cmdlen + len < (int)_COMMAND_LINE_LEN) {
         memmove (pThis->cmdline + pThis->cursor + len,
                          pThis->cmdline + pThis->cursor,
-                         pThis->cmdlen - pThis->cursor);
+                         (size_t)(pThis->cmdlen - pThis->cursor));
         for (i = 0; i < len; i++) {
             pThis->cmdline [pThis->cursor + i] = text [i];
             if (pThis->cmdline [pThis->cursor + i] == ' ') {
@@ -457,7 +458,7 @@ static void microrl_backspace (microrl_t * pThis)
         terminal_backspace (pThis);
         memmove (pThis->cmdline + pThis->cursor-1,
                          pThis->cmdline + pThis->cursor,
-                         pThis->cmdlen-pThis->cursor+1);
+                         (size_t)(pThis->cmdlen-pThis->cursor+1));
         pThis->cursor--;
         pThis->cmdline [pThis->cmdlen] = '\0';
         pThis->cmdlen--;
@@ -473,12 +474,12 @@ static int common_len (char ** arr)
     int i;
     int j;
     char *shortest = arr[0];
-    int shortlen = strlen(shortest);
+    int shortlen = (int)strlen(shortest);
 
     for (i = 0; arr[i] != NULL; ++i)
-        if (strlen(arr[i]) < shortlen) {
+        if (strlen(arr[i]) < (size_t)shortlen) {
             shortest = arr[i];
-            shortlen = strlen(shortest);
+            shortlen = (int)strlen(shortest);
         }
 
     for (i = 0; i < shortlen; ++i)
@@ -507,7 +508,7 @@ static void microrl_get_complite (microrl_t * pThis)
         int len;
 
         if (compl_token[1] == NULL) {
-            len = strlen (compl_token[0]);
+            len = (int)strlen (compl_token[0]);
         } else {
             len = common_len (compl_token);
             terminal_newline (pThis);
@@ -522,7 +523,7 @@ static void microrl_get_complite (microrl_t * pThis)
         
         if (len) {
             microrl_insert_text (pThis, compl_token[0] + strlen(tkn_arr[status-1]), 
-                                                                    len - strlen(tkn_arr[status-1]));
+                                                                    len - (int)strlen(tkn_arr[status-1]));
             if (compl_token[1] == NULL) 
                 microrl_insert_text (pThis, " ", 1);
         }
@@ -565,7 +566,7 @@ void microrl_insert_char (microrl_t * pThis, int ch)
 {
 #ifdef _USE_ESC_SEQ
     if (pThis->escape) {
-        if (escape_process(pThis, ch))
+        if (escape_process(pThis, (char)ch))
             pThis->escape = 0;
     } else {
 #endif

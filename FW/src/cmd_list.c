@@ -10,6 +10,9 @@
 
 int ucmd_mcu_reset(int argc, char** argv)
 {
+    (void)argc;
+    (void)argv;
+    
     NVIC_SystemReset();
     return -1;
 }
@@ -77,5 +80,5 @@ command_t cmd_list[] = {
     // },
 
 
-    {}, // null list terminator DON'T FORGET THIS!
+    {0}, // null list terminator DON'T FORGET THIS!
 };

@@ -20,7 +20,7 @@ int main(void)
     // uart1
     uart_open();
 
-    printf("Its work\r\n");
+    printf("\r\n");
 
     ucmd_default_init();
 
