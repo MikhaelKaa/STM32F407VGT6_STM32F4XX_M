@@ -12,7 +12,8 @@
                 "${workspaceFolder}/app/cli"
             ],
             "defines": [
-                "STM32F407xx"
+                "STM32F407xx",
+                "BAREMETAL"
             ],
             "cStandard": "c99",
             "cppStandard": "c++11",

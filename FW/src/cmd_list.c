@@ -2,9 +2,7 @@
 // #include <stdio.h>
 
 #include "stm32f407xx.h"
-// #include "green_led.h"
-// #include "dwt_delay.h"
-// #include "uart1.h"
+#include "memory_man.h"
 
 #include "ucmd.h"
 
@@ -31,11 +29,11 @@ command_t cmd_list[] = {
         .fn   = ucmd_mcu_reset,
     },
 
-    // {
-    //   .cmd  = "mem",
-    //   .help = "memory man, use mem help",
-    //   .fn   = ucmd_mem,
-    // },
+    {
+      .cmd  = "mem",
+      .help = "memory man, use mem help",
+      .fn   = ucmd_mem,
+    },
 
     // {
     //   .cmd  = "time",

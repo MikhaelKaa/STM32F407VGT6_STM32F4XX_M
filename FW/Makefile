@@ -44,16 +44,18 @@ C_SOURCES += dev/uart1/uart1.c
 C_SOURCES += app/cli/microrl.c
 C_SOURCES += app/cli/ucmd.c
 C_SOURCES += app/cli/cmd_list.c
-
+C_SOURCES += app/mem/memory_man.c
 
 
 # C includes
 C_INCLUDES += -ICMSIS/
+C_INCLUDES += -Isrc/
 C_INCLUDES += -Iapp/board_led/
 C_INCLUDES += -Iapp/dwt_delay/
 C_INCLUDES += -Idev/uart1/
 C_INCLUDES += -Iapp/cli/
-C_INCLUDES += -Isrc/
+C_INCLUDES += -Iapp/mem/
+
 
 
 
@@ -68,6 +70,7 @@ AS_DEFS =
 
 # C defines
 C_DEFS += -DSTM32F407xx
+C_DEFS += -DBAREMETAL
 
 
 #######################################
