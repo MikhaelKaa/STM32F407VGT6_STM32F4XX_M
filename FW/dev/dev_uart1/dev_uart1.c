@@ -1,10 +1,38 @@
-// File Name: uart1.c
-// Implementation of POSIX-style UART interface
+/* SPDX-License-Identifier: MIT */
+/*
+ * uart1.c - POSIX-style UART interface implementation for stm32f407xx
+ * 
+ * Copyright (c) 2025 Michael Kaa
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-#include "uart1.h"
+#include <string.h>
+#include <errno.h>
+
+#include "dev_uart1.h"
+#include "stm32f407xx.h"
+
+#define TX_TIMEOUT (10000000U)
 
 // Static buffers
-static          uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
+static uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
 static volatile uint8_t rx_buffer[UART_RX_BUFFER_SIZE];
 
 // Ring buffer pointers for RX
@@ -15,8 +43,10 @@ static volatile uint32_t rx_write_pos = 0;
 static volatile uint8_t tx_in_progress = 0;
 static volatile uint32_t tx_complete_flag = 0;
 
-// Initialize UART peripheral
-void uart_init(void) {
+static int uart_available(void);
+
+// Open UART (interface implementation)
+static int uart_open(void) {
     // Enable clocks
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
@@ -34,7 +64,7 @@ void uart_init(void) {
     GPIOA->OSPEEDR |= (3 << GPIO_OSPEEDR_OSPEED9_Pos) | (3 << GPIO_OSPEEDR_OSPEED10_Pos);
     
     // Configure USART1 - 115200 baud at 84MHz
-    USART1->BRR = (84000000 + 115200 / 2) / 115200;
+    USART1->BRR = (84000000 + 115200 / 2) / 115200; //TODO: Variable baudrate, CLK
     USART1->CR1 = USART_CR1_TE | USART_CR1_RE | USART_CR1_RXNEIE;
     USART1->CR3 = USART_CR3_DMAT | USART_CR3_DMAR;
     USART1->CR1 |= USART_CR1_UE;
@@ -77,18 +107,11 @@ void uart_init(void) {
     // Clear buffers
     memset((void *)tx_buffer, 0, UART_TX_BUFFER_SIZE);
     memset((void *)rx_buffer, 0, UART_RX_BUFFER_SIZE);
-
-    setvbuf(stdin, NULL, _IONBF, 0);
+    return 0;  // Success
 }
 
-// Open UART (POSIX-like)
-int uart_open(void) {
-    uart_init();
-    return UART_FD;  // Return file descriptor
-}
-
-// Close UART (POSIX-like)
-int uart_close(void) {
+// Close UART (interface implementation)
+static int uart_close(void) {
     // Disable UART and DMA
     USART1->CR1 &= ~USART_CR1_UE;
     DMA2_Stream7->CR &= ~DMA_SxCR_EN;
@@ -99,69 +122,85 @@ int uart_close(void) {
     NVIC_DisableIRQ(DMA2_Stream7_IRQn);
     NVIC_DisableIRQ(DMA2_Stream5_IRQn);
     
-    return UART_SUCCESS;
+    return 0;  // Success
 }
 
-// Write data to UART (POSIX-like)
-ssize_t uart_write(const void *buf, size_t count) {
+// Функция проверки буфера 
+// static int is_dma_safe_buffer(const void *buf) {
+//     uint32_t addr = (uint32_t)buf;
+    
+//     // Проверяем выравнивание (4 байта)
+//     if (addr & 0x3) return 0;
+    
+//     // Проверяем, что буфер в DMA-доступной области памяти
+//     // (зависит от конкретного МК и linker script)
+//     if (addr >= 0x20000000 && addr < 0x20020000) return 1;
+    
+//     return 0;
+// }
+
+
+// Write data to UART (interface implementation)
+static int uart_write(const void *buf, size_t count) {
     if (buf == NULL || count == 0) {
-        return UART_EINVAL;
+        return -EINVAL;
     }
     
     if (count > UART_TX_BUFFER_SIZE) {
         count = UART_TX_BUFFER_SIZE;
     }
-    
+
     // Wait for previous transmission to complete
-    uint32_t timeout = 1000000;  // Timeout counter
+    uint32_t timeout = TX_TIMEOUT;  // Timeout counter
     while (tx_in_progress && timeout--) {
         __asm__("nop");
     }
     
     if (timeout == 0) {
-        return UART_ETIMEOUT;
+        return -ETIMEDOUT;
     }
     
+
+    // // Проверяем, можно ли использовать буфер напрямую
+    // if (is_dma_safe_buffer(buf)) {
+    //     // Используем внешний буфер напрямую - БЕЗ КОПИРОВАНИЯ
+    //     DMA2_Stream7->M0AR = (uint32_t)buf;
+    // } else {
+    //     // Копируем в безопасный буфер
+    //     memcpy(tx_buffer, buf, count);
+    //     DMA2_Stream7->M0AR = (uint32_t)tx_buffer;
+    // }
+
+
     // Copy data to buffer
     memcpy(tx_buffer, buf, count);
     tx_in_progress = 1;
-    tx_complete_flag = 0;
     
     // Configure and start DMA transfer
     DMA2_Stream7->M0AR = (uint32_t)tx_buffer;
     DMA2_Stream7->NDTR = count;
     DMA2_Stream7->CR |= DMA_SxCR_EN;
     
-    // Wait for transmission to complete
-    timeout = 1000000;
-    while (!tx_complete_flag && timeout--) {
-        __asm__("nop");
-    }
-    
-    if (timeout == 0) {
-        return UART_ETIMEOUT;
-    }
-    
-    return (ssize_t)count;
+    return (int)count;
 }
 
-// Read data from UART (POSIX-like)
-ssize_t uart_read(void *buf, size_t count) {
+// Read data from UART (interface implementation)
+static int uart_read(void *buf, size_t count) {
     if (buf == NULL) {
-        return UART_EINVAL;
+        return -EINVAL;
     }
     
     uint8_t *buffer = (uint8_t *)buf;
     size_t bytes_read = 0;
     
     // Calculate available bytes in ring buffer
-    uint32_t available = (uint32_t)uart_available();
+    int available = uart_available();
     if (available == 0) {
         return 0;  // No data available
     }
     
-    if (count > available) {
-        count = available;
+    if (count > (size_t)available) {
+        count = (size_t)available;
     }
     
     // Read data from ring buffer
@@ -171,29 +210,48 @@ ssize_t uart_read(void *buf, size_t count) {
         bytes_read++;
     }
     
-    return (ssize_t)bytes_read;
+    return (int)bytes_read;
 }
 
 // Check how many bytes are available to read
-int uart_available(void) {
+static int uart_available(void) {
     uint32_t current_ndtr = DMA2_Stream5->NDTR;
     uint32_t current_write_pos = (UART_RX_BUFFER_SIZE - current_ndtr) % UART_RX_BUFFER_SIZE;
+    int retval = -1;
     
     if (current_write_pos >= rx_read_pos) {
-        return (int)(current_write_pos - rx_read_pos);
+        retval = (int)(current_write_pos - rx_read_pos);
     } else {
-        return (int)((UART_RX_BUFFER_SIZE - rx_read_pos) + current_write_pos);
+        retval = (int)((UART_RX_BUFFER_SIZE - rx_read_pos) + current_write_pos);
+    }
+    return retval;
+}
+
+// Flush RX buffer
+static int uart_flush(void) {
+    rx_read_pos = (UART_RX_BUFFER_SIZE - DMA2_Stream5->NDTR) % UART_RX_BUFFER_SIZE;
+    return 0;
+}
+
+// IO Control for UART (interface implementation)
+static int uart_ioctrl(int cmd, void *arg) {
+    switch (cmd) {
+        case UART_GET_AVAILABLE:
+            if (arg != NULL) {
+                *(int *)arg = uart_available();
+            }
+            return 0;
+            
+        case UART_FLUSH:
+            return uart_flush();
+            
+        default:
+            return -ENOTSUP;  // Command not supported
     }
 }
 
-
-
-
-// Flush RX buffer
-int uart_flush(void) {
-    rx_read_pos = (UART_RX_BUFFER_SIZE - DMA2_Stream5->NDTR) % UART_RX_BUFFER_SIZE;
-    return UART_SUCCESS;
-}
+// UART device instance
+const interface_t uart1_dev = {.open = uart_open, .close = uart_close, .read = uart_read, .write = uart_write, .ioctrl = uart_ioctrl};
 
 // USART1 Interrupt Handler
 void USART1_IRQHandler(void) {
@@ -209,8 +267,7 @@ void USART1_IRQHandler(void) {
 void DMA2_Stream7_IRQHandler(void) {
     if (DMA2->HISR & DMA_HISR_TCIF7) {
         DMA2->HIFCR |= DMA_HIFCR_CTCIF7;  // Clear transfer complete flag
-        tx_in_progress = 0;
-        tx_complete_flag = 1;
+        tx_in_progress = 0;  // Mark as ready for next transmission
     }
 }
 
@@ -228,48 +285,3 @@ void DMA2_Stream5_IRQHandler(void) {
         // Optional: handle full buffer event
     }
 }
-
-// // printf implementation using UART
-// int uart_printf(const char *format, ...) {
-//     char buffer[256];
-//     va_list args;
-//     va_start(args, format);
-//     int len = vsnprintf(buffer, sizeof(buffer), format, args);
-//     va_end(args);
-    
-//     if (len > 0) {
-//         uart_write(buffer, len);
-//     }
-    
-//     return len;
-// }
-
-// // scanf implementation using UART (simplified)
-// int uart_scanf(const char *format, ...) {
-//     char buffer[256];
-//     va_list args;
-//     va_start(args, format);
-    
-//     // Wait for data with timeout
-//     uint32_t timeout = 1000000;
-//     while (uart_available() == 0 && timeout--) {
-//         __asm__("nop");
-//     }
-    
-//     if (timeout == 0) {
-//         va_end(args);
-//         return UART_ETIMEOUT;
-//     }
-    
-//     // Read available data
-//     ssize_t bytes_read = uart_read(buffer, sizeof(buffer) - 1);
-//     if (bytes_read > 0) {
-//         buffer[bytes_read] = '\0';
-//         int result = vsscanf(buffer, format, args);
-//         va_end(args);
-//         return result;
-//     }
-    
-//     va_end(args);
-//     return 0;
-// }

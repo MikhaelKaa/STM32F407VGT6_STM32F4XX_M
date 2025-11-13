@@ -8,8 +8,10 @@
                 "${workspaceFolder}/CMSIS",
                 "${workspaceFolder}/app/board_led",
                 "${workspaceFolder}/app/dwt_delay",
-                "${workspaceFolder}/dev/uart1",
-                "${workspaceFolder}/app/cli"
+                "${workspaceFolder}/app/cli",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/dev/dev_uart1",
+                "${workspaceFolder}/dev"
             ],
             "defines": [
                 "STM32F407xx",

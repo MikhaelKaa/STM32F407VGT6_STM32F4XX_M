@@ -4,7 +4,7 @@
 #include "stm32f407xx.h"
 #include "green_led.h"
 #include "dwt_delay.h"
-#include "uart1.h"
+#include "dev_uart1.h"
 #include "ucmd.h"
 
 
@@ -18,7 +18,9 @@ int main(void)
     dwt_delay_init();
 
     // uart1
-    uart_open();
+    uart1_dev.open();
+    setvbuf(stdin, NULL, _IONBF, 0);  // Отключаем буферизацию stdin
+    setvbuf(stdout, NULL, _IONBF, 0); // Отключаем буферизацию stdout
 
     printf("\r\n");
 
