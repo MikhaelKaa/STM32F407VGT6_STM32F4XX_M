@@ -4,9 +4,9 @@
 #include "stm32f407xx.h"
 #include "green_led.h"
 #include "dwt_delay.h"
-#include "dev_uart1.h"
 #include "ucmd.h"
 
+#include "dev_list.h"
 
 int main(void)
 {
@@ -17,10 +17,12 @@ int main(void)
     // init dwt time module
     dwt_delay_init();
 
-    // uart1
+    // uart1 - printf, console
     uart1_dev.open();
     setvbuf(stdin, NULL, _IONBF, 0);  // Отключаем буферизацию stdin
     setvbuf(stdout, NULL, _IONBF, 0); // Отключаем буферизацию stdout
+    
+    uart2_dev.open();
 
     printf("\r\n");
 
@@ -30,7 +32,6 @@ int main(void)
 
     while (1)
     {
-
         // blink led demo
         green_led_set((led_cnt++ & 256) ? (led_off) : (led_on));
 

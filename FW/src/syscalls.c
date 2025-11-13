@@ -32,7 +32,6 @@
 #include <unistd.h>
 
 #include "dev_uart1.h"
-#include "dev_interface.h"
 
 char*  __env[1] = {0};
 char** environ  = __env;

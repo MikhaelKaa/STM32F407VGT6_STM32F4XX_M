@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /*
- * dev_uart1.h - POSIX-style UART interface implementation
+ * dev_uart2.h - POSIX-style UART2 interface implementation for stm32f407xx
  * 
  * Copyright (c) 2025 Michael Kaa
  * 
@@ -23,22 +23,24 @@
  * SOFTWARE.
  */
 
-#ifndef DEV_UART1_H
-#define DEV_UART1_H
+#ifndef DEV_UART2_H
+#define DEV_UART2_H
 
 #include <stddef.h>
 #include <stdint.h>
 #include "dev_interface.h"
 
+// STM32F407: PA2 (TX) и PA3 (RX).
+
 // Buffer sizes
-#define UART_TX_BUFFER_SIZE 256
-#define UART_RX_BUFFER_SIZE 256
+#define UART2_TX_BUFFER_SIZE 256
+#define UART2_RX_BUFFER_SIZE 256
 
-// UART-specific ioctrl commands
-#define UART_GET_AVAILABLE  (INTERFACE_CMD_DEVICE + 0)
-#define UART_FLUSH          (INTERFACE_CMD_DEVICE + 1)
+// UART2-specific ioctrl commands
+#define UART2_GET_AVAILABLE  (INTERFACE_CMD_DEVICE + 0)
+#define UART2_FLUSH          (INTERFACE_CMD_DEVICE + 1)
 
-// Global UART device instance
-extern const interface_t uart1_dev;
+// Global UART2 device instance
+extern const interface_t uart2_dev;
 
-#endif /* DEV_UART1_H */
+#endif /* DEV_UART2_H */

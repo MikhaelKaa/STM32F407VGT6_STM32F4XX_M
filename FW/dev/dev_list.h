@@ -1,19 +1,19 @@
 /* SPDX-License-Identifier: MIT */
 /*
- * dev_uart1.h - POSIX-style UART interface implementation
- * 
+ * dev_list.h - Unified device interface abstraction
+ *
  * Copyright (c) 2025 Michael Kaa
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,22 +23,13 @@
  * SOFTWARE.
  */
 
-#ifndef DEV_UART1_H
-#define DEV_UART1_H
+#ifndef _DEV_LIST_H
+#define _DEV_LIST_H
 
-#include <stddef.h>
-#include <stdint.h>
 #include "dev_interface.h"
 
-// Buffer sizes
-#define UART_TX_BUFFER_SIZE 256
-#define UART_RX_BUFFER_SIZE 256
+#include "dev_uart1.h"
+#include "dev_uart2.h"
 
-// UART-specific ioctrl commands
-#define UART_GET_AVAILABLE  (INTERFACE_CMD_DEVICE + 0)
-#define UART_FLUSH          (INTERFACE_CMD_DEVICE + 1)
 
-// Global UART device instance
-extern const interface_t uart1_dev;
-
-#endif /* DEV_UART1_H */
+#endif /* _DEV_LIST_H */

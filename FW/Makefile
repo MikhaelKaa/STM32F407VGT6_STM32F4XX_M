@@ -40,11 +40,14 @@ C_SOURCES += src/syscalls.c
 C_SOURCES += src/system_init.c
 C_SOURCES += src/sysmem.c
 C_SOURCES += dev/dev_uart1/dev_uart1.c
+C_SOURCES += dev/dev_uart2/dev_uart2.c
 C_SOURCES += app/board_led/green_led.c
 C_SOURCES += app/cli/microrl.c
 C_SOURCES += app/cli/ucmd.c
 C_SOURCES += app/cli/cmd_list.c
 C_SOURCES += app/mem/memory_man.c
+C_SOURCES += app/uping/uart_ping.c
+
 
 
 # C includes
@@ -52,10 +55,12 @@ C_INCLUDES += -ICMSIS
 C_INCLUDES += -Isrc
 C_INCLUDES += -Idev
 C_INCLUDES += -Idev/dev_uart1
+C_INCLUDES += -Idev/dev_uart2
 C_INCLUDES += -Iapp/board_led
 C_INCLUDES += -Iapp/dwt_delay
 C_INCLUDES += -Iapp/cli
 C_INCLUDES += -Iapp/mem
+C_INCLUDES += -Iapp/uping
 
 
 

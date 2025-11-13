@@ -3,7 +3,7 @@
 
 #include "stm32f407xx.h"
 #include "memory_man.h"
-
+#include "uart_ping.h"
 #include "ucmd.h"
 
 int ucmd_mcu_reset(int argc, char** argv)
@@ -35,47 +35,12 @@ command_t cmd_list[] = {
       .fn   = ucmd_mem,
     },
 
-    // {
-    //   .cmd  = "time",
-    //   .help = "rtc time. to set type time hh mm ss",
-    //   .fn   = ucmd_time,
-    // },
+    {
+      .cmd  = "uping",
+      .help = "uart test utility",
+      .fn   = ucmd_uping,
+    },
 
-    // {
-    //   .cmd  = "coremark",
-    //   .help = "coremark",
-    //   .fn   = coremark,
-    // },
-
-    // {
-    //   .cmd  = "sd",
-    //   .help = "sd card test utils",
-    //   .fn   = ucmd_sd,
-    // },
-
-    // {
-    //   .cmd  = "imu",
-    //   .help = "imu test code",
-    //   .fn   = ucmd_imu,
-    // },
-
-    // {
-    //   .cmd  = "i2c",
-    //   .help = "i2c tool",
-    //   .fn   = ucmd_i2c,
-    // },
-
-    // {
-    //   .cmd  = "bmp",
-    //   .help = "bmp tool",
-    //   .fn   = ucmd_bmp,
-    // },
-
-    // {
-    //   .cmd  = "term",
-    //   .help = "term test",
-    //   .fn   = ucmd_term_test,
-    // },
 
 
     {0}, // null list terminator DON'T FORGET THIS!

@@ -10,8 +10,11 @@
                 "${workspaceFolder}/app/dwt_delay",
                 "${workspaceFolder}/app/cli",
                 "${workspaceFolder}/src",
+                "${workspaceFolder}/dev",
                 "${workspaceFolder}/dev/dev_uart1",
-                "${workspaceFolder}/dev"
+                "${workspaceFolder}/dev/dev_uart2",
+                "${workspaceFolder}/app/mem",
+                "${workspaceFolder}/app/uping"
             ],
             "defines": [
                 "STM32F407xx",

@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /*
- * interface.h - Unified device interface abstraction
+ * dev_interface.h - Unified device interface abstraction
  *
  * Copyright (c) 2025 Michael Kaa
  *
@@ -29,6 +29,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <errno.h>
+
 
 /**
  * struct interface - Unified device interface
