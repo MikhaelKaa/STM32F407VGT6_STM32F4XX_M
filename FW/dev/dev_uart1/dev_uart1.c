@@ -251,7 +251,7 @@ static int uart_ioctrl(int cmd, void *arg) {
 }
 
 // UART device instance
-const interface_t uart1_dev = {.open = uart_open, .close = uart_close, .read = uart_read, .write = uart_write, .ioctrl = uart_ioctrl};
+const interface_t dev_uart1 = {.open = uart_open, .close = uart_close, .read = uart_read, .write = uart_write, .ioctrl = uart_ioctrl};
 
 // USART1 Interrupt Handler
 void USART1_IRQHandler(void) {

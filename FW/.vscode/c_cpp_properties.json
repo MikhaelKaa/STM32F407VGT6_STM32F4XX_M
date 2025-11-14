@@ -14,7 +14,9 @@
                 "${workspaceFolder}/dev/dev_uart1",
                 "${workspaceFolder}/dev/dev_uart2",
                 "${workspaceFolder}/app/mem",
-                "${workspaceFolder}/app/uping"
+                "${workspaceFolder}/app/uping",
+                "${workspaceFolder}/dev/dev_rng",
+                "${workspaceFolder}/app/rng_gen"
             ],
             "defines": [
                 "STM32F407xx",

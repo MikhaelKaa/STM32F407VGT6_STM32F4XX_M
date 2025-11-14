@@ -28,7 +28,13 @@
 #include <string.h>
 #include <errno.h>
 
-#include "dev_uart2.h"
+#include "uart_ping.h"
+
+// #include "dev_uart2.h"
+interface_t* dev_uart_ping = NULL;
+
+
+uint8_t tx_buf[1024] = {0};
 
 #ifdef BAREMETAL
 int ucmd_uping(int argc, char* argv[])
@@ -44,6 +50,12 @@ int main(int argc, char* argv[])
     int rx_bytes;
     int available;
     size_t to_read;
+
+
+    if(!dev_uart_ping){
+        printf("dev_uart_ping is NULL"ENDL);
+        return -EFAULT;
+    }
 
     // Check arguments
     if (argc < 2) {
@@ -78,19 +90,26 @@ int main(int argc, char* argv[])
     printf("UART2 Ping Test" ENDL);
     printf("Sending %lu bytes of 0x%02X" ENDL, count, pattern);
 
-    // Send pattern bytes
-    for (uint32_t i = 0; i < count; i++) {
-        int result = uart2_dev.write(&pattern, 1);
-        if (result != 1) {
-            printf("Send error: %d" ENDL, result);
-            return result;
-        }
+    memset(tx_buf, pattern, count);
+
+    int result = dev_uart_ping->write(tx_buf, count);
+    if (result != (int)count) {
+        printf("Send error: %d" ENDL, result);
+        return result;
     }
+    // Send pattern bytes
+    // for (uint32_t i = 0; i < count; i++) {
+    //     int result = dev_uart2.write(&pattern, 1);
+    //     if (result != 1) {
+    //         printf("Send error: %d" ENDL, result);
+    //         return result;
+    //     }
+    // }
 
     printf("Send completed" ENDL);
 
     // Check for received data
-    uart2_dev.ioctrl(UART2_GET_AVAILABLE, &available);
+    dev_uart_ping->ioctrl(INTERFACE_CMD_DEVICE, &available);
     
     if (available > 0) {
         printf("Received %d bytes:" ENDL, available);
@@ -102,7 +121,7 @@ int main(int argc, char* argv[])
         }
         
         // Read available data
-        rx_bytes = uart2_dev.read(rx_buffer, to_read);
+        rx_bytes = dev_uart_ping->read(rx_buffer, to_read);
         
         if (rx_bytes > 0) {
             // Print in hex format

@@ -7,10 +7,14 @@
 #include "ucmd.h"
 
 #include "dev_list.h"
+#include "uart_ping.h"
+#include "rng_gen.h"
+
 
 int main(void)
 {
-
+    uint32_t led_cnt = 0;
+    
     // init board led
     green_led_init();
 
@@ -18,17 +22,26 @@ int main(void)
     dwt_delay_init();
 
     // uart1 - printf, console
-    uart1_dev.open();
+    dev_uart1.open();
     setvbuf(stdin, NULL, _IONBF, 0);  // Отключаем буферизацию stdin
     setvbuf(stdout, NULL, _IONBF, 0); // Отключаем буферизацию stdout
     
-    uart2_dev.open();
+    dev_uart2.open();
 
     printf("\r\n");
 
-    ucmd_default_init();
+    
+    dev_rng.open();
+    uint32_t rng_buf[16] = {0};
+    dev_rng.read(rng_buf, sizeof(rng_buf));
+    for(unsigned int i = 0; i < sizeof(rng_buf)/4; i++) {
+        printf("0x%08lx\r\n", rng_buf[i]);
+    }
 
-    uint32_t led_cnt = 0;
+    dev_uart_ping = (interface_t*)&dev_uart2;
+    dev_rng_gen   = (interface_t*)&dev_rng;
+
+    ucmd_default_init();
 
     while (1)
     {

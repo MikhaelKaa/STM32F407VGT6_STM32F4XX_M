@@ -23,19 +23,22 @@
  * SOFTWARE.
  */
 
-#ifndef _INTERFACE_H
-#define _INTERFACE_H
+#ifndef _UART_PING_H
+#define _UART_PING_H
 
 #include <stddef.h>
 #include <stdint.h>
 #include <errno.h>
 
+#include "dev_interface.h"
 
 /**
  * TODO: ...
  */
 int ucmd_uping(int argc, char **argv);
 
-#endif /* _INTERFACE_H */
+extern interface_t* dev_uart_ping;
+
+#endif /* _UART_PING_H */
 
 

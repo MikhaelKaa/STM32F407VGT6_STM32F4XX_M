@@ -39,6 +39,6 @@
 #define UART_FLUSH          (INTERFACE_CMD_DEVICE + 1)
 
 // Global UART device instance
-extern const interface_t uart1_dev;
+extern const interface_t dev_uart1;
 
 #endif /* DEV_UART1_H */

@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /*
- * dev_list.h - Unified device interface abstraction
+ * rng_gen.h - RNG utility header
  *
  * Copyright (c) 2025 Michael Kaa
  *
@@ -23,13 +23,20 @@
  * SOFTWARE.
  */
 
-#ifndef _DEV_LIST_H
-#define _DEV_LIST_H
+#ifndef _RNG_GEN_H
+#define _RNG_GEN_H
+
+#include <stddef.h>
+#include <stdint.h>
+#include <errno.h>
 
 #include "dev_interface.h"
 
-#include "dev_uart1.h"
-#include "dev_uart2.h"
-#include "dev_rng.h"
+/**
+ * RNG utility command
+ */
+int ucmd_rng(int argc, char **argv);
 
-#endif /* _DEV_LIST_H */
+extern interface_t* dev_rng_gen;
+
+#endif /* _RNG_GEN_H */

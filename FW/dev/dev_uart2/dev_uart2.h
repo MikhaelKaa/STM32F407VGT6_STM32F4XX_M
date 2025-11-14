@@ -41,6 +41,6 @@
 #define UART2_FLUSH          (INTERFACE_CMD_DEVICE + 1)
 
 // Global UART2 device instance
-extern const interface_t uart2_dev;
+extern const interface_t dev_uart2;
 
 #endif /* DEV_UART2_H */

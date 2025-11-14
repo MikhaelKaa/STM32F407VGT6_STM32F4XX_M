@@ -40,7 +40,7 @@ int _write(int file, char* ptr, int len)
 {
     if (file == STDOUT_FILENO || file == STDERR_FILENO)
     {
-        return uart1_dev.write(ptr, (size_t)len);
+        return dev_uart1.write(ptr, (size_t)len);
     }
     errno = EIO;
     return -1;
@@ -50,7 +50,7 @@ int _write(int file, char* ptr, int len)
 int __io_getchar(void)
 {
     uint8_t ch = 0;
-    uart1_dev.read(&ch, 1);
+    dev_uart1.read(&ch, 1);
     return ch;
 }
 
