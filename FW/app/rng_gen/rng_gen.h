@@ -37,6 +37,6 @@
  */
 int ucmd_rng(int argc, char **argv);
 
-extern interface_t* dev_rng_gen;
+int app_dev_rng_set(interface_t* dev);
 
 #endif /* _RNG_GEN_H */

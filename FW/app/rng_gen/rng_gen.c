@@ -28,10 +28,9 @@
 #include <string.h>
 #include <errno.h>
 
-#include "rng_gen.h"
+#include "dev_interface.h"
 
 interface_t* dev_rng_gen = NULL;
-
 uint8_t rng_buffer[1024] = {0};
 
 #ifdef BAREMETAL
@@ -46,7 +45,7 @@ int main(int argc, char* argv[])
     int bytes_read;
 
     if(!dev_rng_gen){
-        printf("dev_rng_gen is NULL"ENDL);
+        printf("dev_rng_gen is NULL" ENDL);
         return -EFAULT;
     }
 
@@ -69,7 +68,6 @@ int main(int argc, char* argv[])
         count = 1024;
     }
 
-    printf("RNG Test" ENDL);
     printf("Generating %lu random bytes..." ENDL, count);
 
     // Generate random bytes
@@ -84,12 +82,25 @@ int main(int argc, char* argv[])
 
     // Print in hex format
     for (uint32_t i = 0; i < count; i++) {
-        printf("%02X ", rng_buffer[i]);
+        printf("%02x", rng_buffer[i]);
         if ((i + 1) % 16 == 0) printf(ENDL);
     }
     if (count % 16 != 0) printf(ENDL);
 
     return 0;
+}
+
+int app_dev_rng_set(interface_t* dev)
+{
+    if (dev != NULL)
+    {
+        dev_rng_gen = dev;
+        return 0;
+    }
+    else
+    {
+        return -EFAULT;
+    }
 }
 
 #undef ENDL

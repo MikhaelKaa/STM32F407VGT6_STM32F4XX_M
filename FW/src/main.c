@@ -30,16 +30,14 @@ int main(void)
 
     printf("\r\n");
 
-    
-    dev_rng.open();
-    uint32_t rng_buf[16] = {0};
-    dev_rng.read(rng_buf, sizeof(rng_buf));
-    for(unsigned int i = 0; i < sizeof(rng_buf)/4; i++) {
-        printf("0x%08lx\r\n", rng_buf[i]);
-    }
+    // Get RNG instance
+    interface_t* dev_rng = dev_rng_get();
+    // Init RNG
+    dev_rng->ioctrl(RNG_INIT, NULL);
+    // Set rng pointer to app
+    app_dev_rng_set(dev_rng_get());
 
     dev_uart_ping = (interface_t*)&dev_uart2;
-    dev_rng_gen   = (interface_t*)&dev_rng;
 
     ucmd_default_init();
 

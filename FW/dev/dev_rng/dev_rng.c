@@ -32,7 +32,7 @@
 static volatile uint32_t rng_status = 0;
 
 // Open RNG (interface implementation)
-static int rng_open(void) {
+static int rng_init(void) {
     // Enable RNG clock
     RCC->AHB2ENR |= RCC_AHB2ENR_RNGEN;
     
@@ -47,7 +47,7 @@ static int rng_open(void) {
 }
 
 // Close RNG (interface implementation)
-static int rng_close(void) {
+static int rng_deinit(void) {
     // Disable the RNG
     RNG->CR &= ~RNG_CR_RNGEN;
     
@@ -56,6 +56,14 @@ static int rng_close(void) {
     
     rng_status = 0;
     return 0;
+}
+
+static int rng_open(void) {
+    return -ENOTSUP;
+}
+
+static int rng_close(void) {
+    return -ENOTSUP;
 }
 
 // Read random data from RNG (interface implementation)
@@ -165,6 +173,12 @@ static int rng_self_test(void) {
 // IO Control for RNG (interface implementation)
 static int rng_ioctrl(int cmd, void *arg) {
     switch (cmd) {
+        case RNG_INIT:
+            return rng_init();
+            
+        case RNG_DEINIT:
+            return rng_deinit();
+
         case RNG_GET_STATUS:
             if (arg != NULL) {
                 *(uint32_t *)arg = rng_get_status();
@@ -190,3 +204,8 @@ const interface_t dev_rng = {
     .write = rng_write,
     .ioctrl = rng_ioctrl
 };
+
+// RNG device instance accessor
+interface_t* dev_rng_get(void) {
+    return (interface_t*)&dev_rng;
+}

@@ -30,9 +30,7 @@
 
 #include "uart_ping.h"
 
-// #include "dev_uart2.h"
 interface_t* dev_uart_ping = NULL;
-
 
 uint8_t tx_buf[1024] = {0};
 
@@ -87,8 +85,8 @@ int main(int argc, char* argv[])
         count = 1024;
     }
 
-    printf("UART2 Ping Test" ENDL);
-    printf("Sending %lu bytes of 0x%02X" ENDL, count, pattern);
+    printf("UART Ping Test" ENDL);
+    printf("Sending %lu bytes of 0x%02x" ENDL, count, pattern);
 
     memset(tx_buf, pattern, count);
 
@@ -97,14 +95,6 @@ int main(int argc, char* argv[])
         printf("Send error: %d" ENDL, result);
         return result;
     }
-    // Send pattern bytes
-    // for (uint32_t i = 0; i < count; i++) {
-    //     int result = dev_uart2.write(&pattern, 1);
-    //     if (result != 1) {
-    //         printf("Send error: %d" ENDL, result);
-    //         return result;
-    //     }
-    // }
 
     printf("Send completed" ENDL);
 
@@ -126,7 +116,7 @@ int main(int argc, char* argv[])
         if (rx_bytes > 0) {
             // Print in hex format
             for (int i = 0; i < rx_bytes; i++) {
-                printf("%02X ", rx_buffer[i]);
+                printf("%02x ", rx_buffer[i]);
                 if ((i + 1) % 16 == 0) printf(ENDL);
             }
             if (rx_bytes % 16 != 0) printf(ENDL);
