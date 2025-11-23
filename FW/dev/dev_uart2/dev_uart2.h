@@ -36,11 +36,12 @@
 #define UART2_TX_BUFFER_SIZE 256
 #define UART2_RX_BUFFER_SIZE 256
 
-// UART2-specific ioctrl commands
-#define UART2_GET_AVAILABLE  (INTERFACE_CMD_DEVICE + 0)
-#define UART2_FLUSH          (INTERFACE_CMD_DEVICE + 1)
+// UART-specific ioctl commands
+#define UART_INIT           (INTERFACE_CMD_DEVICE + 0)
+#define UART_DEINIT         (INTERFACE_CMD_DEVICE + 1)
+#define UART_GET_AVAILABLE  (INTERFACE_CMD_DEVICE + 2)
+#define UART_FLUSH          (INTERFACE_CMD_DEVICE + 3)
 
-// Global UART2 device instance
-extern const interface_t dev_uart2;
+const interface_t* dev_uart2_get(void);
 
 #endif /* DEV_UART2_H */

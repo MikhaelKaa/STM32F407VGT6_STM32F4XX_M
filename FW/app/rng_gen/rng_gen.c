@@ -31,7 +31,7 @@
 #include "dev_interface.h"
 
 interface_t* dev_rng_gen = NULL;
-uint8_t rng_buffer[1024] = {0};
+// uint8_t rng_buffer[1024] = {0};
 
 #ifdef BAREMETAL
 int ucmd_rng(int argc, char* argv[])
@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 #define ENDL "\n"
 #endif
 {
-    uint32_t count;
+    uint32_t cnt;
     int bytes_read;
 
     if(!dev_rng_gen){
@@ -56,36 +56,30 @@ int main(int argc, char* argv[])
         return -EINVAL;
     }
 
-    // Parse byte count
-    if (sscanf(argv[1], "%lu", &count) != 1 || count == 0) {
-        printf("Invalid byte count: %s" ENDL, argv[1]);
+    // Parse byte cnt
+    if (sscanf(argv[1], "%lu", &cnt) != 1 || cnt == 0) {
+        printf("Invalid byte cnt: %s" ENDL, argv[1]);
         return -EINVAL;
     }
-
-    // Limit maximum count to prevent buffer overflow
-    if (count > 1024) {
-        printf("Count too large, limiting to 1024" ENDL);
-        count = 1024;
-    }
-
-    printf("Generating %lu random bytes..." ENDL, count);
-
-    // Generate random bytes
-    bytes_read = dev_rng_gen->read(rng_buffer, count);
     
-    if (bytes_read != (int)count) {
-        printf("RNG read error: %d" ENDL, bytes_read);
-        return bytes_read;
-    }
-
-    printf("Generation completed" ENDL);
-
     // Print in hex format
-    for (uint32_t i = 0; i < count; i++) {
-        printf("%02x", rng_buffer[i]);
+    uint8_t rng_buf;
+    for (uint32_t i = 0; i < cnt; i++) {
+
+        bytes_read = dev_rng_gen->read(&rng_buf, 1);
+
+        if (bytes_read != 1) {
+            printf("RNG read error: %d" ENDL, bytes_read);
+            return bytes_read;
+        }
+
+        printf("%02x", rng_buf);
+
         if ((i + 1) % 16 == 0) printf(ENDL);
     }
-    if (count % 16 != 0) printf(ENDL);
+    if (cnt % 16 != 0) printf(ENDL);
+    
+    printf("Generation %lu bytes completed" ENDL, cnt);
 
     return 0;
 }

@@ -46,7 +46,7 @@ static volatile uint32_t tx_complete_flag = 0;
 static int uart_available(void);
 
 // Open UART2 (interface implementation)
-static int uart_open(void) {
+static int uart_init(void) {
     // Enable clocks
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
@@ -111,7 +111,7 @@ static int uart_open(void) {
 }
 
 // Close UART2 (interface implementation)
-static int uart_close(void) {
+static int uart_deinit(void) {
     // Disable UART and DMA
     USART2->CR1 &= ~USART_CR1_UE;
     DMA1_Stream6->CR &= ~DMA_SxCR_EN;
@@ -200,6 +200,7 @@ static int uart_available(void) {
     return retval;
 }
 
+// TODO: WTF???
 // Flush RX buffer
 static int uart_flush(void) {
     rx_read_pos = (UART2_RX_BUFFER_SIZE - DMA1_Stream5->NDTR) % UART2_RX_BUFFER_SIZE;
@@ -207,15 +208,22 @@ static int uart_flush(void) {
 }
 
 // IO Control for UART2 (interface implementation)
-static int uart_ioctrl(int cmd, void *arg) {
+static int uart_ioctl(int cmd, void *arg) {
     switch (cmd) {
-        case UART2_GET_AVAILABLE:
+        case UART_INIT:
+            uart_init();
+            return 0;
+
+        case UART_DEINIT:
+            uart_deinit();
+            return 0;
+        case UART_GET_AVAILABLE:
             if (arg != NULL) {
                 *(int *)arg = uart_available();
             }
             return 0;
             
-        case UART2_FLUSH:
+        case UART_FLUSH:
             return uart_flush();
             
         default:
@@ -224,7 +232,12 @@ static int uart_ioctrl(int cmd, void *arg) {
 }
 
 // UART2 device instance
-const interface_t dev_uart2 = {.open = uart_open, .close = uart_close, .read = uart_read, .write = uart_write, .ioctrl = uart_ioctrl};
+static const interface_t dev_uart2 = {.read = uart_read, .write = uart_write, .ioctl = uart_ioctl};
+
+const interface_t* dev_uart2_get(void)
+{
+    return (const interface_t*)&dev_uart2;
+}
 
 // USART2 Interrupt Handler
 void USART2_IRQHandler(void) {

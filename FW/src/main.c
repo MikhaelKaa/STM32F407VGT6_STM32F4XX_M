@@ -22,22 +22,23 @@ int main(void)
     dwt_delay_init();
 
     // uart1 - printf, console
-    dev_uart1.open();
+    dev_uart1_get()->ioctl(UART_INIT, 0);
     setvbuf(stdin, NULL, _IONBF, 0);  // Отключаем буферизацию stdin
     setvbuf(stdout, NULL, _IONBF, 0); // Отключаем буферизацию stdout
     
-    dev_uart2.open();
+    // dev_uart2.open();
 
     printf("\r\n");
 
     // Get RNG instance
-    interface_t* dev_rng = dev_rng_get();
+    interface_t* dev_rng = (interface_t*)dev_rng_get();
     // Init RNG
-    dev_rng->ioctrl(RNG_INIT, NULL);
+    dev_rng->ioctl(RNG_INIT, NULL);
     // Set rng pointer to app
-    app_dev_rng_set(dev_rng_get());
+    app_dev_rng_set((interface_t*)dev_rng_get());
 
-    dev_uart_ping = (interface_t*)&dev_uart2;
+    dev_uart_ping = (interface_t*)dev_uart2_get();
+    dev_uart_ping->ioctl(UART_INIT, 0);
 
     ucmd_default_init();
 

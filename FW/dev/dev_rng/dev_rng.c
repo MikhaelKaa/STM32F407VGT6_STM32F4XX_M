@@ -58,14 +58,6 @@ static int rng_deinit(void) {
     return 0;
 }
 
-static int rng_open(void) {
-    return -ENOTSUP;
-}
-
-static int rng_close(void) {
-    return -ENOTSUP;
-}
-
 // Read random data from RNG (interface implementation)
 static int rng_read(void *buf, size_t count) {
     if (buf == NULL || count == 0) {
@@ -197,15 +189,13 @@ static int rng_ioctrl(int cmd, void *arg) {
 }
 
 // RNG device instance
-const interface_t dev_rng = {
-    .open = rng_open,
-    .close = rng_close,
+static const interface_t dev_rng = {
     .read = rng_read,
     .write = rng_write,
-    .ioctrl = rng_ioctrl
+    .ioctl = rng_ioctrl
 };
 
 // RNG device instance accessor
-interface_t* dev_rng_get(void) {
-    return (interface_t*)&dev_rng;
+const interface_t* dev_rng_get(void) {
+    return (const interface_t*)&dev_rng;
 }
