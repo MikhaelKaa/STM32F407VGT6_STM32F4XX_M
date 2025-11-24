@@ -99,8 +99,7 @@ int main(int argc, char* argv[])
     printf("Send completed" ENDL);
 
     // Check for received data
-    // TODO: WARING!!! INTERFACE_CMD_DEVICE+2 <--- its NO good.
-    dev_uart_ping->ioctl(INTERFACE_CMD_DEVICE+2, &available);
+    dev_uart_ping->ioctl(UART_GET_AVAILABLE, &available);
     
     if (available > 0) {
         printf("Received %d bytes:" ENDL, available);

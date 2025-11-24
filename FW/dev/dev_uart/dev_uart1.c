@@ -26,14 +26,28 @@
 #include <string.h>
 #include <errno.h>
 
-#include "dev_uart1.h"
+#include "dev_uart.h"
 #include "stm32f407xx.h"
 
-#define TX_TIMEOUT (10000000U)
+#ifndef UART1_TX_TIMEOUT
+#define UART1_TX_TIMEOUT (10000000U)
+#endif // UART1_TX_TIMEOUT
+
+// Buffer sizes
+#ifndef UART1_TX_BUFFER_SIZE
+#define UART1_TX_BUFFER_SIZE (256U)
+#endif // UART1_TX_BUFFER_SIZE
+
+#ifndef UART1_RX_BUFFER_SIZE
+#define UART1_RX_BUFFER_SIZE (256U)
+#endif // UART1_RX_BUFFER_SIZE
+
+// Driver version
+const char *dev_uart1_version = "1.0.0";
 
 // Static buffers
-static uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
-static volatile uint8_t rx_buffer[UART_RX_BUFFER_SIZE];
+static uint8_t tx_buffer[UART1_TX_BUFFER_SIZE];
+static volatile uint8_t rx_buffer[UART1_RX_BUFFER_SIZE];
 
 // Ring buffer pointers for RX
 static volatile uint32_t rx_read_pos = 0;
@@ -88,7 +102,7 @@ static int uart_init(void) {
     
     DMA2_Stream5->PAR = (uint32_t)&USART1->DR;
     DMA2_Stream5->M0AR = (uint32_t)rx_buffer;
-    DMA2_Stream5->NDTR = UART_RX_BUFFER_SIZE;
+    DMA2_Stream5->NDTR = UART1_RX_BUFFER_SIZE;
     
     DMA2_Stream5->CR = (4 << DMA_SxCR_CHSEL_Pos) |  // Channel 4
                        DMA_SxCR_MINC |              // Memory increment
@@ -105,8 +119,8 @@ static int uart_init(void) {
     NVIC_EnableIRQ(DMA2_Stream5_IRQn);
     
     // Clear buffers
-    memset((void *)tx_buffer, 0, UART_TX_BUFFER_SIZE);
-    memset((void *)rx_buffer, 0, UART_RX_BUFFER_SIZE);
+    memset((void *)tx_buffer, 0, UART1_TX_BUFFER_SIZE);
+    memset((void *)rx_buffer, 0, UART1_RX_BUFFER_SIZE);
     return 0;  // Success
 }
 
@@ -146,12 +160,12 @@ static int uart_write(const void *buf, size_t count) {
         return -EINVAL;
     }
     
-    if (count > UART_TX_BUFFER_SIZE) {
-        count = UART_TX_BUFFER_SIZE;
+    if (count > UART1_TX_BUFFER_SIZE) {
+        count = UART1_TX_BUFFER_SIZE;
     }
 
     // Wait for previous transmission to complete
-    uint32_t timeout = TX_TIMEOUT;  // Timeout counter
+    uint32_t timeout = UART1_TX_TIMEOUT;  // Timeout counter
     while (tx_in_progress && timeout--) {
         __asm__("nop");
     }
@@ -206,7 +220,7 @@ static int uart_read(void *buf, size_t count) {
     // Read data from ring buffer
     for (size_t i = 0; i < count; i++) {
         buffer[i] = rx_buffer[rx_read_pos];
-        rx_read_pos = (rx_read_pos + 1) % UART_RX_BUFFER_SIZE;
+        rx_read_pos = (rx_read_pos + 1) % UART1_RX_BUFFER_SIZE;
         bytes_read++;
     }
     
@@ -216,21 +230,14 @@ static int uart_read(void *buf, size_t count) {
 // Check how many bytes are available to read
 static int uart_available(void) {
     uint32_t current_ndtr = DMA2_Stream5->NDTR;
-    uint32_t current_write_pos = (UART_RX_BUFFER_SIZE - current_ndtr) % UART_RX_BUFFER_SIZE;
-    int retval = -1;
-    
-    if (current_write_pos >= rx_read_pos) {
-        retval = (int)(current_write_pos - rx_read_pos);
-    } else {
-        retval = (int)((UART_RX_BUFFER_SIZE - rx_read_pos) + current_write_pos);
-    }
-    return retval;
+    uint32_t available_bytes = (UART1_RX_BUFFER_SIZE - current_ndtr - rx_read_pos) % UART1_RX_BUFFER_SIZE;
+    return (int)available_bytes;
 }
 
 // TODO: WTF???
 // Flush RX buffer
 static int uart_flush(void) {
-    rx_read_pos = (UART_RX_BUFFER_SIZE - DMA2_Stream5->NDTR) % UART_RX_BUFFER_SIZE;
+    // rx_read_pos = (UART1_RX_BUFFER_SIZE - DMA2_Stream5->NDTR) % UART1_RX_BUFFER_SIZE;
     return 0;
 }
 
@@ -250,7 +257,13 @@ static int uart_ioctl(int cmd, void *arg) {
                 *(int *)arg = uart_available();
             }
             return 0;
-            
+
+        case UART_GET_VERSION:
+            if (arg != NULL) {
+                *(const char **)arg = dev_uart1_version;
+                return 0;
+            }
+            return -EINVAL;       
 
         case UART_FLUSH:
             return uart_flush();

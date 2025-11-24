@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <errno.h>
 
-#include "dev_interface.h"
+#include "dev_uart.h"
 
 /**
  * TODO: ...

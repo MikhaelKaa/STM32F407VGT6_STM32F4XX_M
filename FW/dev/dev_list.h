@@ -28,8 +28,7 @@
 
 #include "dev_interface.h"
 
-#include "dev_uart1.h"
-#include "dev_uart2.h"
+#include "dev_uart.h"
 #include "dev_rng.h"
 
 #endif /* _DEV_LIST_H */

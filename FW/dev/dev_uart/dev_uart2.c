@@ -26,10 +26,21 @@
 #include <string.h>
 #include <errno.h>
 
-#include "dev_uart2.h"
+#include "dev_uart.h"
 #include "stm32f407xx.h"
 
-#define TX_TIMEOUT (10000000U)
+#ifndef UART2_TX_TIMEOUT
+#define UART2_TX_TIMEOUT (10000000U)
+#endif // UART2_TX_TIMEOUT
+
+// Buffer sizes
+#ifndef UART2_TX_BUFFER_SIZE
+#define UART2_TX_BUFFER_SIZE (256U)
+#endif // UART2_TX_BUFFER_SIZE
+
+#ifndef UART2_RX_BUFFER_SIZE
+#define UART2_RX_BUFFER_SIZE (256U)
+#endif // UART2_RX_BUFFER_SIZE
 
 // Static buffers
 static uint8_t tx_buffer[UART2_TX_BUFFER_SIZE];
@@ -42,6 +53,9 @@ static volatile uint32_t rx_write_pos = 0;
 // DMA transfer state
 static volatile uint8_t tx_in_progress = 0;
 static volatile uint32_t tx_complete_flag = 0;
+
+// Driver version
+const char *dev_uart2_version = "1.0.0";
 
 static int uart_available(void);
 
@@ -136,7 +150,7 @@ static int uart_write(const void *buf, size_t count) {
     }
 
     // Wait for previous transmission to complete
-    uint32_t timeout = TX_TIMEOUT;
+    uint32_t timeout = UART2_TX_TIMEOUT;
     while (tx_in_progress && timeout--) {
         __asm__("nop");
     }
@@ -186,24 +200,17 @@ static int uart_read(void *buf, size_t count) {
     return (int)bytes_read;
 }
 
-// Check how many bytes are available to read
+// Check how many bytes are available to read (FIXED VERSION)
 static int uart_available(void) {
     uint32_t current_ndtr = DMA1_Stream5->NDTR;
-    uint32_t current_write_pos = (UART2_RX_BUFFER_SIZE - current_ndtr) % UART2_RX_BUFFER_SIZE;
-    int retval = -1;
-    
-    if (current_write_pos >= rx_read_pos) {
-        retval = (int)(current_write_pos - rx_read_pos);
-    } else {
-        retval = (int)((UART2_RX_BUFFER_SIZE - rx_read_pos) + current_write_pos);
-    }
-    return retval;
+    uint32_t available_bytes = (UART2_RX_BUFFER_SIZE - current_ndtr - rx_read_pos) % UART2_RX_BUFFER_SIZE;
+    return (int)available_bytes;
 }
 
 // TODO: WTF???
 // Flush RX buffer
 static int uart_flush(void) {
-    rx_read_pos = (UART2_RX_BUFFER_SIZE - DMA1_Stream5->NDTR) % UART2_RX_BUFFER_SIZE;
+    // rx_read_pos = (UART2_RX_BUFFER_SIZE - DMA1_Stream5->NDTR) % UART2_RX_BUFFER_SIZE;
     return 0;
 }
 
@@ -222,6 +229,13 @@ static int uart_ioctl(int cmd, void *arg) {
                 *(int *)arg = uart_available();
             }
             return 0;
+            
+        case UART_GET_VERSION:
+            if (arg != NULL) {
+                *(const char **)arg = dev_uart2_version;
+                return 0;
+            }
+            return -EINVAL;       
             
         case UART_FLUSH:
             return uart_flush();

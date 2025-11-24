@@ -33,9 +33,7 @@
 
 /**
  * struct interface - Unified device interface
- * @open: Initialize and open device
- * @close: Close and deinitialize device
- * @read: Read data from device
+ * @read:  Read data from device
  * @write: Write data to device
  * @ioctl: Device control and configuration
  *
@@ -44,8 +42,6 @@
  */
 typedef struct interface
 {
-    // int (*open)(void);
-    // int (*close)(void);
     int (*read)(void* buf, size_t len);
     int (*write)(const void* buf, size_t len);
     int (*ioctl)(int cmd, void* arg);
@@ -59,6 +55,6 @@ typedef struct interface
 #define INTERFACE_GET_CONFIG 0x1004 /* Get device configuration */
 
 /* Device-specific command space */
-#define INTERFACE_CMD_DEVICE 0x8000 /* Base for device-specific commands */
+#define INTERFACE_CMD_DEVICE 0x2000 /* Base for device-specific commands */
 
 #endif /* _INTERFACE_H */
