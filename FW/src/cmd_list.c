@@ -6,6 +6,7 @@
 #include "ucmd.h"
 #include "uart_ping.h"
 #include "rng_gen.h"
+#include "svc_test.h"
 
 int ucmd_mcu_reset(int argc, char** argv)
 {
@@ -47,7 +48,11 @@ command_t cmd_list[] = {
       .help = "rng generate utility",
       .fn   = ucmd_rng,
     },
-
+    {
+      .cmd  = "svc",
+      .help = "SVCall demo utility",
+      .fn   = ucmd_tscv,
+    },
 
     {0}, // null list terminator DON'T FORGET THIS!
 };
