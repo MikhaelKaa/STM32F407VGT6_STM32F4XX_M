@@ -49,90 +49,200 @@ static sd_card_info_t card_info = {0};
 static volatile uint8_t transfer_complete = 0;
 static volatile uint8_t transfer_error = 0;
 
+
 // Private function prototypes
 static int sdio_wait_response(uint32_t mask, uint32_t value, uint32_t timeout);
-static int sdio_send_command(uint32_t cmd, uint32_t arg);
+int sdio_send_command(uint32_t cmd, uint32_t arg);
 static int sdio_initialize_card(void);
 static int sdio_set_bus_width(uint32_t width);
 
-// Open SDIO (interface implementation)
+
+
+
+
+
+
 static int sdio_init(void) {
-    // Enable clocks
+    // ****************************************** GPIO ************************
+    // Инициализация аппаратной части SDIO
+        // 1. Инициализация тактирования
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_GPIODEN;
     RCC->APB2ENR |= RCC_APB2ENR_SDIOEN;
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
     
-    // Configure GPIO for SDIO
-    // PC8 - DAT0, PC9 - DAT1, PC10 - DAT2, PC11 - DAT3, PC12 - CLK
+    // 2. Инициализация GPIO
+    // PC8 - SDIO_D0
+    // PC9 - SDIO_D1  
+    // PC10 - SDIO_D2
+    // PC11 - SDIO_D3
+    // PC12 - SDIO_CK
+    // PD2 - SDIO_CMD
+    
+    // Настройка порта C
     GPIOC->MODER &= ~(GPIO_MODER_MODER8 | GPIO_MODER_MODER9 | 
                       GPIO_MODER_MODER10 | GPIO_MODER_MODER11 | 
                       GPIO_MODER_MODER12);
-    GPIOC->MODER |= (2 << GPIO_MODER_MODER8_Pos) | (2 << GPIO_MODER_MODER9_Pos) |
-                    (2 << GPIO_MODER_MODER10_Pos) | (2 << GPIO_MODER_MODER11_Pos) |
-                    (2 << GPIO_MODER_MODER12_Pos);
+    GPIOC->MODER |= (2U << GPIO_MODER_MODER8_Pos) |  // Alternate function
+                    (2U << GPIO_MODER_MODER9_Pos) |
+                    (2U << GPIO_MODER_MODER10_Pos) |
+                    (2U << GPIO_MODER_MODER11_Pos) |
+                    (2U << GPIO_MODER_MODER12_Pos);
     
-    // Alternate function AF12 for SDIO
-    GPIOC->AFR[1] &= ~(GPIO_AFRH_AFSEL8 | GPIO_AFRH_AFSEL9 | 
-                       GPIO_AFRH_AFSEL10 | GPIO_AFRH_AFSEL11 | 
-                       GPIO_AFRH_AFSEL12);
-    GPIOC->AFR[1] |= (12 << (4 * 0)) | (12 << (4 * 1)) | 
-                     (12 << (4 * 2)) | (12 << (4 * 3)) |
-                     (12 << (4 * 4));
+    GPIOC->OSPEEDR |= GPIO_OSPEEDER_OSPEEDR8 |  // Very high speed
+                      GPIO_OSPEEDER_OSPEEDR9 |
+                      GPIO_OSPEEDER_OSPEEDR10 |
+                      GPIO_OSPEEDER_OSPEEDR11 |
+                      GPIO_OSPEEDER_OSPEEDR12;
     
-    // PD2 - CMD
+    GPIOC->AFR[1] |= (12U << GPIO_AFRH_AFSEL8_Pos) |  // AF12 для SDIO
+                     (12U << GPIO_AFRH_AFSEL9_Pos) |
+                     (12U << GPIO_AFRH_AFSEL10_Pos) |
+                     (12U << GPIO_AFRH_AFSEL11_Pos) |
+                     (12U << GPIO_AFRH_AFSEL12_Pos);
+
+    GPIOC->PUPDR &= ~(GPIO_PUPDR_PUPDR8 | GPIO_PUPDR_PUPDR9 |
+                      GPIO_PUPDR_PUPDR10 | GPIO_PUPDR_PUPDR11 |
+                      GPIO_PUPDR_PUPDR12);
+    GPIOC->PUPDR |= (1U << GPIO_PUPDR_PUPD8_Pos) |  // Pull-up
+                    (1U << GPIO_PUPDR_PUPD9_Pos) |
+                    (1U << GPIO_PUPDR_PUPD10_Pos) |
+                    (1U << GPIO_PUPDR_PUPD11_Pos) |
+                    (1U << GPIO_PUPDR_PUPD12_Pos);
+
+    // Настройка порта D для CMD (PD2)
     GPIOD->MODER &= ~GPIO_MODER_MODER2;
-    GPIOD->MODER |= (2 << GPIO_MODER_MODER2_Pos);
-    GPIOD->AFR[0] &= ~GPIO_AFRL_AFSEL2;
-    GPIOD->AFR[0] |= (12 << (4 * 2));
+    GPIOD->MODER |= (2U << GPIO_MODER_MODER2_Pos);  // Alternate function
     
-    // High speed
-    GPIOC->OSPEEDR |= (3 << GPIO_OSPEEDR_OSPEED8_Pos) | (3 << GPIO_OSPEEDR_OSPEED9_Pos) |
-                      (3 << GPIO_OSPEEDR_OSPEED10_Pos) | (3 << GPIO_OSPEEDR_OSPEED11_Pos) |
-                      (3 << GPIO_OSPEEDR_OSPEED12_Pos);
-    GPIOD->OSPEEDR |= (3 << GPIO_OSPEEDR_OSPEED2_Pos);
+    GPIOD->OSPEEDR |= GPIO_OSPEEDER_OSPEEDR2;  // Very high speed
     
-    // Pull-ups
-    GPIOC->PUPDR &= ~(GPIO_PUPDR_PUPD8 | GPIO_PUPDR_PUPD9 | 
-                      GPIO_PUPDR_PUPD10 | GPIO_PUPDR_PUPD11);
-    GPIOC->PUPDR |= (1 << GPIO_PUPDR_PUPD8_Pos) | (1 << GPIO_PUPDR_PUPD9_Pos) |
-                    (1 << GPIO_PUPDR_PUPD10_Pos) | (1 << GPIO_PUPDR_PUPD11_Pos);
+    GPIOD->AFR[0] |= (12U << GPIO_AFRL_AFSEL2_Pos);  // AF12 для SDIO
+    GPIOD->PUPDR &= ~GPIO_PUPDR_PUPDR2;
+    GPIOD->PUPDR |= (1U << GPIO_PUPDR_PUPD2_Pos);  // Pull-up
+
+
+    // ****************************************** DMA *************************
+    #ifdef SDIO_USE_DMA
+    // Остановка DMA потоков
+    DMA2_Stream3->CR &= ~DMA_SxCR_EN;
+    DMA2_Stream6->CR &= ~DMA_SxCR_EN;
     
-    // Configure SDIO peripheral
-    SDIO->POWER = 0;  // Power off
-    for(volatile int i = 0; i < 1000; i++);
+    // Ожидание остановки потоков
+    while(DMA2_Stream3->CR & DMA_SxCR_EN);
+    while(DMA2_Stream6->CR & DMA_SxCR_EN);
     
-    SDIO->POWER = SDIO_POWER_PWRCTRL_0;  // Power on
-    for(volatile int i = 0; i < 1000; i++);
+    // Сброс флагов прерываний
+    DMA2->LIFCR = DMA_LIFCR_CTCIF3 | DMA_LIFCR_CHTIF3 | 
+                  DMA_LIFCR_CTEIF3 | DMA_LIFCR_CDMEIF3 | 
+                  DMA_LIFCR_CFEIF3;
+    DMA2->HIFCR = DMA_HIFCR_CTCIF6 | DMA_HIFCR_CHTIF6 | 
+                  DMA_HIFCR_CTEIF6 | DMA_HIFCR_CDMEIF6 | 
+                  DMA_HIFCR_CFEIF6;
     
-    // Set initial clock (400kHz for initialization)
-    SDIO->CLKCR = (0x76 << SDIO_CLKCR_CLKDIV_Pos) |  // 400kHz from 48MHz
-                  SDIO_CLKCR_CLKEN | 
-                  SDIO_CLKCR_PWRSAV;
+    // Настройка DMA2 Stream3 (RX) - канал 4
+    DMA2_Stream3->CR = 0;
+    DMA2_Stream3->CR |= (4U << DMA_SxCR_CHSEL_Pos) |  // Channel 4
+                       DMA_SxCR_PL |                  // High priority
+                       DMA_SxCR_MSIZE_1 |             // 32-bit memory
+                       DMA_SxCR_PSIZE_1 |             // 32-bit peripheral
+                       DMA_SxCR_MINC |                // Memory increment
+                       DMA_SxCR_PFCTRL |              // Peripheral flow control
+                       DMA_SxCR_DBM |                 // Double buffer mode
+                       DMA_SxCR_CIRC;                 // Circular mode
     
-    SDIO->DTIMER = 0xFFFFFFFF;  // Data timeout
+    DMA2_Stream3->FCR |= DMA_SxFCR_DMDIS |           // Direct mode disabled
+                        DMA_SxFCR_FTH;               // Full FIFO threshold
     
-    // Clear flags
-    SDIO->ICR = 0xFFFFFFFF;
+    // Настройка DMA2 Stream6 (TX) - канал 4
+    DMA2_Stream6->CR = 0;
+    DMA2_Stream6->CR |= (4U << DMA_SxCR_CHSEL_Pos) |  // Channel 4
+                       DMA_SxCR_PL |                  // High priority
+                       DMA_SxCR_MSIZE_1 |             // 32-bit memory
+                       DMA_SxCR_PSIZE_1 |             // 32-bit peripheral
+                       DMA_SxCR_MINC |                // Memory increment
+                       DMA_SxCR_DIR_0 |               // Memory to peripheral
+                       DMA_SxCR_PFCTRL |              // Peripheral flow control
+                       DMA_SxCR_DBM |                 // Double buffer mode
+                       DMA_SxCR_CIRC;                 // Circular mode
     
-    // Enable interrupts
-    SDIO->MASK = SDIO_MASK_DCRCFAILIE | SDIO_MASK_DTIMEOUTIE | 
-                 SDIO_MASK_DATAENDIE | SDIO_MASK_CMDRENDIE | 
-                 SDIO_MASK_CMDSENTIE | SDIO_MASK_RXOVERRIE | 
-                 SDIO_MASK_TXUNDERRIE;
+    DMA2_Stream6->FCR |= DMA_SxFCR_DMDIS |           // Direct mode disabled
+                        DMA_SxFCR_FTH;               // Full FIFO threshold
     
+    // Включаем прерывания DMA
+    DMA2_Stream3->CR |= DMA_SxCR_TCIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE;
+    DMA2_Stream6->CR |= DMA_SxCR_TCIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE;
+    #endif // SDIO_USE_DMA        
+
+
+    // ****************************************** IRQ *************************
+    // Приоритеты прерываний
+    NVIC_SetPriority(SDIO_IRQn, 7);      // Низкий приоритет для SDIO
+    #ifdef SDIO_USE_DMA
+    NVIC_SetPriority(DMA2_Stream3_IRQn, 0); // Высокий приоритет для DMA RX
+    NVIC_SetPriority(DMA2_Stream6_IRQn, 0); // Высокий приоритет для DMA TX
+    #endif // SDIO_USE_DMA 
+    
+    // Включаем прерывания
     NVIC_EnableIRQ(SDIO_IRQn);
+    #ifdef SDIO_USE_DMA
+    NVIC_EnableIRQ(DMA2_Stream3_IRQn);
+    NVIC_EnableIRQ(DMA2_Stream6_IRQn);
+    #endif // SDIO_USE_DMA 
+
+    // ****************************************** SDIO ************************
+    // Сброс SDIO
+    RCC->APB2RSTR |= RCC_APB2RSTR_SDIORST;
+    for(volatile int i = 0; i < 1000; i++); // Задержка
+    RCC->APB2RSTR &= ~RCC_APB2RSTR_SDIORST;
+    for(volatile int i = 0; i < 1000; i++); // Задержка после сброса
     
-    // Initialize card
-    int ret = sdio_initialize_card();
-    if (ret != 0) {
-        return ret;
+    // Настройка тактирования SDIO
+    // Частота SDIO_CK = 48MHz / (CLKDIV + 2)
+    // Для инициализации карты нужно < 400kHz, поэтому CLKDIV = 118 (48MHz/120 = 400kHz)
+    SDIO->CLKCR = 0;
+    SDIO->CLKCR |= (118U << SDIO_CLKCR_CLKDIV_Pos) |  // Divider для 400kHz
+                  SDIO_CLKCR_CLKEN |                  // Включить тактирование
+                  SDIO_CLKCR_PWRSAV;                  // Режим энергосбережения
+    
+    // Настройка управления питанием
+    // ВНИМАНИЕ: Нужно установить оба бита PWRCTRL в '11' (0x3)
+    SDIO->POWER = 0;
+    for(volatile int i = 0; i < 1000; i++); // Задержка
+    SDIO->POWER = SDIO_POWER_PWRCTRL;  // Устанавливаем ВСЕ биты PWRCTRL (0x3)
+    
+    // Ожидание включения питания
+    // Ждем, пока биты PWRCTRL установятся в 11
+    uint32_t timeout = 1000000;
+    while(!(SDIO->POWER & SDIO_POWER_PWRCTRL) && timeout--) {
+        // Пустой цикл ожидания
     }
     
-    // Set higher clock speed after initialization (24MHz)
-    SDIO->CLKCR = (1 << SDIO_CLKCR_CLKDIV_Pos) |  // 24MHz from 48MHz
-                  SDIO_CLKCR_CLKEN | 
-                  SDIO_CLKCR_PWRSAV | 
-                  SDIO_CLKCR_WIDBUS_0;  // 4-bit bus
+    // Если таймаут - ошибка
+    if(timeout == 0) {
+        // Можно добавить обработку ошибки
+        return -ETIMEDOUT;
+    }
+    
+    // Очистка всех флагов
+    SDIO->ICR = 0xFFFFFFFF;
+    
+    // Включаем прерывания SDIO (только основные для начала)
+    SDIO->MASK = 0;
+    SDIO->MASK |= SDIO_MASK_CCRCFAILIE |  // Ошибка CRC команды
+                 SDIO_MASK_DCRCFAILIE |  // Ошибка CRC данных
+                 SDIO_MASK_CTIMEOUTIE |  // Таймаут команды
+                 SDIO_MASK_DTIMEOUTIE |  // Таймаут данных
+                 SDIO_MASK_TXUNDERRIE |  // Underrun ошибка передачи
+                 SDIO_MASK_RXOVERRIE |   // Overrun ошибка приема
+                 SDIO_MASK_CMDRENDIE |   // Команда выполнена
+                 SDIO_MASK_CMDSENTIE |   // Команда отправлена
+                 SDIO_MASK_DATAENDIE;    // Конец передачи данных
+    
+    // Настройка таймаутов
+    SDIO->DTIMER = 0xFFFFFFFF;  // Таймаут данных
+    SDIO->DLEN = 0;            // Длина данных
+    
+    // Настройка DCTRL регистра (пока отключен)
+    SDIO->DCTRL = 0;
     
     return 0;
 }
@@ -145,10 +255,17 @@ static int sdio_deinit(void) {
     
     // Disable interrupts
     NVIC_DisableIRQ(SDIO_IRQn);
+    NVIC_DisableIRQ(DMA2_Stream3_IRQn);
+    NVIC_DisableIRQ(DMA2_Stream6_IRQn);
     SDIO->MASK = 0;
+    
+    // Deinitialize DMA
+    DMA2_Stream3->CR &= ~DMA_SxCR_EN;
+    DMA2_Stream6->CR &= ~DMA_SxCR_EN;
     
     // Disable clocks
     RCC->APB2ENR &= ~RCC_APB2ENR_SDIOEN;
+    RCC->AHB1ENR &= ~RCC_AHB1ENR_DMA2EN;
     
     return 0;
 }
@@ -158,11 +275,20 @@ static int sdio_wait_response(uint32_t mask, uint32_t value, uint32_t timeout) {
     while (timeout--) {
         uint32_t status = SDIO->STA;
         
-        if (status & (SDIO_STA_CMDREND | SDIO_STA_CMDSENT | SDIO_STA_CTIMEOUT | SDIO_STA_CCRCFAIL)) {
+        // Если произошла ошибка
+        if (status & (SDIO_STA_CTIMEOUT | SDIO_STA_CCRCFAIL)) {
+            SDIO->ICR = status & (SDIO_STA_CTIMEOUT | SDIO_STA_CCRCFAIL);
+            return -EIO;
+        }
+        
+        // Если команда завершилась успешно
+        if (status & mask) {
+            // Проверяем, что установился ожидаемый флаг
             if ((status & mask) == value) {
-                SDIO->ICR = mask;  // Clear flags
+                SDIO->ICR = status & mask;
                 return 0;
             }
+            // Если установился не тот флаг, который ожидали
             return -EIO;
         }
     }
@@ -170,21 +296,39 @@ static int sdio_wait_response(uint32_t mask, uint32_t value, uint32_t timeout) {
 }
 
 // Send command to SD card
-static int sdio_send_command(uint32_t cmd, uint32_t arg) {
-    SDIO->ARG = arg;
-    SDIO->CMD = cmd;
+int sdio_send_command(uint32_t cmd, uint32_t arg) {
+    // Очищаем флаги перед отправкой команды
+    SDIO->ICR = SDIO_ICR_CMDRENDC | SDIO_ICR_CMDSENTC | 
+                SDIO_ICR_CTIMEOUTC | SDIO_ICR_CCRCFAILC;
     
-    return sdio_wait_response(SDIO_STA_CMDREND | SDIO_STA_CMDSENT, 
-                             SDIO_STA_CMDREND | SDIO_STA_CMDSENT, 
-                             SDIO_TIMEOUT);
+    SDIO->ARG = arg;
+    
+    // Формируем команду: CPSMEN + номер команды
+    SDIO->CMD = SDIO_CMD_CPSMEN | cmd;
+    
+    // Для разных команд разные ожидаемые ответы:
+    // - CMD0, CMD55: ожидаем CMDSENT (команда отправлена, нет ответа)
+    // - Остальные: ожидаем CMDREND (получен ответ)
+    
+    uint32_t expected_response;
+    if (cmd == 0U || cmd == 55U) {
+        expected_response = SDIO_STA_CMDSENT;
+    } else {
+        expected_response = SDIO_STA_CMDREND;
+    }
+    
+    return sdio_wait_response(expected_response, expected_response, SDIO_TIMEOUT);
 }
 
 // Initialize SD card
 static int sdio_initialize_card(void) {
     int ret;
     
+    // Даем карте время на инициализацию
+    for(volatile int i = 0; i < 10000; i++);
+    
     // CMD0 - GO_IDLE_STATE
-    ret = sdio_send_command(SDIO_CMD_CPSMEN | 0, 0);
+    ret = sdio_send_command((SDIO_CMD_CPSMEN | 0), 0);
     if (ret != 0) return ret;
     
     // CMD8 - SEND_IF_COND
@@ -323,11 +467,11 @@ static int sdio_write(const void *buf, size_t count) {
     
     // Write data to FIFO
     const uint8_t *buffer = (const uint8_t *)buf;
-    for (size_t i = 0; i < count / 4; i++) {
-        uint32_t data = buffer[i * 4] | 
-                       (buffer[i * 4 + 1] << 8) |
-                       (buffer[i * 4 + 2] << 16) |
-                       (buffer[i * 4 + 3] << 24);
+    for (size_t i = 0U; i < count / 4U; i++) {
+        uint32_t data = buffer[i * 4U] | 
+                       (buffer[i * 4U + 1U] << 8U) |
+                       (buffer[i * 4U + 2U] << 16U) |
+                       (buffer[i * 4U + 3U] << 24U);
         SDIO->FIFO = data;
     }
     
@@ -433,5 +577,39 @@ void SDIO_IRQHandler(void) {
     
     if (status & SDIO_STA_CMDSENT) {
         SDIO->ICR = SDIO_ICR_CMDSENTC;
+    }
+}
+
+void DMA2_Stream3_IRQHandler(void) {
+    // Обработка прерываний DMA RX
+    uint32_t status = DMA2->LISR;
+    
+    if(status & DMA_LISR_TCIF3) {
+        // Transfer complete
+        DMA2->LIFCR |= DMA_LIFCR_CTCIF3;
+        // Ваш код обработки завершения приема
+    }
+    
+    if(status & DMA_LISR_TEIF3) {
+        // Transfer error
+        DMA2->LIFCR |= DMA_LIFCR_CTEIF3;
+        // Обработка ошибки
+    }
+}
+
+void DMA2_Stream6_IRQHandler(void) {
+    // Обработка прерываний DMA TX
+    uint32_t status = DMA2->HISR;
+    
+    if(status & DMA_HISR_TCIF6) {
+        // Transfer complete
+        DMA2->HIFCR |= DMA_HIFCR_CTCIF6;
+        // Ваш код обработки завершения передачи
+    }
+    
+    if(status & DMA_HISR_TEIF6) {
+        // Transfer error
+        DMA2->HIFCR |= DMA_HIFCR_CTEIF6;
+        // Обработка ошибки
     }
 }

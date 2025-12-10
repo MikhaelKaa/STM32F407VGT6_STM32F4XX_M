@@ -37,4 +37,5 @@
   },
   "C_Cpp.dimInactiveRegions": true,
   "idf.pythonInstallPath": "/usr/bin/python",
+  "git.ignoreLimitWarning": true,
 }

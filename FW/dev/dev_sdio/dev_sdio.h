@@ -50,4 +50,7 @@
 
 const interface_t* dev_sdio_get(void);
 
+// for test
+int sdio_send_command(uint32_t cmd, uint32_t arg);
+
 #endif /* DEV_SDIO_H */

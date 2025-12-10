@@ -7,6 +7,7 @@
 #include "uart_ping.h"
 #include "rng_gen.h"
 #include "svc_test.h"
+#include "sdio_test.h"
 
 int ucmd_mcu_reset(int argc, char** argv)
 {
@@ -53,6 +54,10 @@ command_t cmd_list[] = {
       .help = "SVCall demo utility",
       .fn   = ucmd_tscv,
     },
-
+    {
+      .cmd  = "sdio",
+      .help = "sdio test utility",
+      .fn   = ucmd_sdio,
+    },
     {0}, // null list terminator DON'T FORGET THIS!
 };

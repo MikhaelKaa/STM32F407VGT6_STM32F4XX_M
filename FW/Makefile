@@ -52,6 +52,7 @@ C_SOURCES += app/mem/memory_man.c
 C_SOURCES += app/uping/uart_ping.c
 C_SOURCES += app/rng_gen/rng_gen.c
 C_SOURCES += app/svcall_test/svc_test.c
+C_SOURCES += app/sdio_test/sdio_test.c
 
 # C includes
 C_INCLUDES += -ICMSIS
@@ -68,6 +69,7 @@ C_INCLUDES += -Iapp/mem
 C_INCLUDES += -Iapp/uping
 C_INCLUDES += -Iapp/rng_gen
 C_INCLUDES += -Iapp/svcall_test
+C_INCLUDES += -Iapp/sdio_test
 
 # ASM sources
 ASM_SOURCES =  src/startup_stm32f407xx.s

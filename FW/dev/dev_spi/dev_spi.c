@@ -301,14 +301,14 @@ const interface_t* dev_spi1_get(void)
     return (const interface_t*) &dev_spi1;
 }
 
-// DMA2 Stream3 Interrupt Handler (SPI1 TX)
-void DMA2_Stream3_IRQHandler(void) {
-    if (DMA2->LISR & DMA_LISR_TCIF3) {
-        DMA2->LIFCR |= DMA_LIFCR_CTCIF3;  // Clear transfer complete flag
-        transfer_in_progress = 0;  // Mark as ready for next transmission
-        spi_set_cs(1);  // Deactivate chip select
-    }
-}
+// // DMA2 Stream3 Interrupt Handler (SPI1 TX)
+// void DMA2_Stream3_IRQHandler(void) {
+//     if (DMA2->LISR & DMA_LISR_TCIF3) {
+//         DMA2->LIFCR |= DMA_LIFCR_CTCIF3;  // Clear transfer complete flag
+//         transfer_in_progress = 0;  // Mark as ready for next transmission
+//         spi_set_cs(1);  // Deactivate chip select
+//     }
+// }
 
 // DMA2 Stream0 Interrupt Handler (SPI1 RX)
 void DMA2_Stream0_IRQHandler(void) {
